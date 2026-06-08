@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        :root { --primary: #5c67f2; --danger: #ff4757; }
+        body { font-family: Tahoma, sans-serif; background: #f0f2f5; display: flex; justify-content: center; padding: 20px; }
+        .card { background: white; width: 100%; max-width: 500px; padding: 20px; border-radius: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        #notification-bell { font-size: 40px; text-align: center; transition: 0.3s; }
+        .shake { animation: shake 0.5s infinite; color: var(--danger); }
+        @keyframes shake { 0%, 100% {transform: rotate(0deg);} 25% {transform: rotate(-15deg);} 75% {transform: rotate(15deg);} }
+        input, select, button { width: 100%; margin: 5px 0; padding: 10px; border: 1px solid #ddd; border-radius: 8px; }
+        button { background: var(--primary); color: white; border: none; cursor: pointer; }
+        .task-item { background: #f9f9f9; padding: 10px; margin: 10px 0; border-right: 5px solid var(--primary); border-radius: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div id="notification-bell">🔔</div>
+    <h2 style="text-align: center;">Orite AI System</h2>
+    
+    <select id="timezone-select"></select>
+    <div id="clock" style="text-align: center; font-weight: bold; margin: 10px 0;"></div>
+    
+    <input type="text" id="task-desc" placeholder="توضیحات برنامه...">
+    <input type="datetime-local" id="task-time">
+    <button onclick="saveTask()">ثبت / ویرایش برنامه</button>
+    
+    <div id="task-list"></div>
+</div>
+
+<script>
+    let tasks = JSON.parse(localStorage.getItem('oriteTasks')) || [];
+    let editIndex = -1;
+
+    // بارگذاری تمام مناطق زمانی دنیا
+    const timezones = Intl.supportedValuesOf('timeZone');
+    const select = document.getElementById('timezone-select');
+    timezones.forEach(tz => select.innerHTML += `<option value="${tz}">${tz}</option>`);
+
+    function saveTask() {
+        const desc = document.getElementById('task-desc').value;
+        const time = new Date(document.getElementById('task-time').value).getTime();
+        if (!desc || !time) return alert("لطفاً همه فیلدها را پر کنید");
+
+        if (editIndex > -1) {
+            tasks[editIndex] = { desc, time };
+            editIndex = -1;
+        } else {
+            tasks.push({ desc, time });
+        }
+        localStorage.setItem('oriteTasks', JSON.stringify(tasks));
+        renderTasks();
+    }
+
+    function renderTasks() {
+        const list = document.getElementById('task-list');
+        list.innerHTML = "";
+        let shouldShake = false;
+        const now = new Date().getTime();
+
+        tasks.forEach((t, i) => {
+            // منطق ۵ ثانیه: اگر الان از زمان تسک ۵ ثانیه گذشته باشد
+            if (now > (t.time + 5000)) shouldShake = true;
+            
+            list.innerHTML += `
+                <div class="task-item">
+                    <strong>${t.desc}</strong><br>
+                    <small>${new Date(t.time).toLocaleString('fa-IR')}</small><br>
+                    <button onclick="editTask(${i})" style="width: auto; background: orange;">ویرایش</button>
+                    <button onclick="deleteTask(${i})" style="width: auto; background: var(--danger);">حذف</button>
+                </div>`;
+        });
+        document.getElementById('notification-bell').className = shouldShake ? "shake" : "";
+    }
+
+    function editTask(i) {
+        editIndex = i;
+        document.getElementById('task-desc').value = tasks[i].desc;
+        document.getElementById('task-time').value = new Date(tasks[i].time).toISOString().slice(0, 16);
+    }
+
+    function deleteTask(i) {
+        tasks.splice(i, 1);
+        localStorage.setItem('oriteTasks', JSON.stringify(tasks));
+        renderTasks();
+    }
+
+    setInterval(() => {
+        const tz = document.getElementById('timezone-select').value;
+        document.getElementById('clock').innerText = new Date().toLocaleTimeString("fa-IR", { timeZone: tz });
+        renderTasks();
+    }, 1000);
+</script>
+</body>
+</html>

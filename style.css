@@ -1,0 +1,8 @@
+.task-list { margin-top: 20px; border-top: 2px solid #eee; padding-top: 10px; }
+.task-item { 
+    background: #f9f9f9; 
+    padding: 10px; 
+    margin: 5px 0; 
+    border-right: 4px solid #5c67f2; 
+    border-radius: 4px;
+}
