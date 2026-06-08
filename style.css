@@ -1,8 +1,29 @@
-.task-list { margin-top: 20px; border-top: 2px solid #eee; padding-top: 10px; }
-.task-item { 
-    background: #f9f9f9; 
-    padding: 10px; 
-    margin: 5px 0; 
-    border-right: 4px solid #5c67f2; 
-    border-radius: 4px;
+/* اصلاح تراز بندی المان‌ها */
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px; /* فاصله یکسان بین همه المان‌ها */
+    width: 100%;
+}
+
+input, select, button {
+    width: 100%; 
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-family: inherit;
+    box-sizing: border-box; /* جلوگیری از بهم ریختگی عرض */
+    display: block;
+}
+
+/* زیباتر کردن لیست کشورها */
+#timezone-select {
+    background-color: #f8f9fa;
+    cursor: pointer;
+}
+
+/* مدیریت فضای لیست برنامه‌ها */
+#task-list {
+    margin-top: 20px;
+    width: 100%;
 }
