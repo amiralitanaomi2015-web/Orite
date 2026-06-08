@@ -14,3 +14,9 @@ Thank you for your interest in contributing to Orite! We are part of the **LuoLa
 
 ---
 *Developed with ❤️ by the LuoLaf Team*
+## How to Contact the LuoLaf Team
+To coordinate your participation, please do not send personal emails. Instead, follow these steps:
+1. Open a new **Issue** in this repository.
+2. Clearly describe your proposed feature or improvement.
+3. Wait for the Project Manager to review and approve your request.
+This ensures all project communications are tracked and organized.
