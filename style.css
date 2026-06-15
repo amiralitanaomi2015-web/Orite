@@ -27,3 +27,21 @@ input, select, button {
     margin-top: 20px;
     width: 100%;
 }
+#settings-panel {
+    /* قفل کردن موقعیت روی صفحه نمایش (نه روی سایت) */
+    position: fixed !important; 
+    top: 50px !important; 
+    right: 20px !important;
+    
+    /* جدا کردن کامل از بقیه عناصر */
+    margin: 0 !important;
+    transform: none !important;
+    
+    /* اولویت نمایش روی همه چیز */
+    z-index: 99999999 !important;
+    
+    /* ابعاد ثابت */
+    width: 350px !important;
+    height: auto !important;
+    pointer-events: auto !important;
+}
