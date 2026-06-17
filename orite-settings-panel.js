@@ -1,9 +1,22 @@
 (function() {
-    // ۱. پاکسازی پنل‌های قبلی
+    // ۱. تزریق CSS به صورت داینامیک (بدون تداخل و خطا)
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        #settings-panel {
+            animation: slideInRight 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards !important;
+        }
+    `;
+    document.head.appendChild(style);
+
+    // ۲. حذف پنل قبلی
     const existing = document.getElementById('settings-panel');
     if (existing) existing.remove();
 
-    // ۲. دیکشنری ۷ زبان
+    // ۳. ساخت پنل
     const ui = {
         fa: { title: "تنظیمات", lang: "زبان:", alarm: "آلارم", save: "ذخیره", reg: "ثبت‌نام (بزودی)", dev: "مدیر: LuoLaf Studio" },
         en: { title: "Settings", lang: "Language:", alarm: "Alarm", save: "Storage", reg: "Register (Soon)", dev: "Manager: LuoLaf Studio" },
@@ -15,24 +28,9 @@
     };
 
     let lang = 'fa';
-
-    // ۳. ساخت پنل
     const panel = document.createElement('div');
     panel.id = 'settings-panel';
-    
-    // استایلِ ثابت: سمت راست پایین (تغییر top به bottom برای جدا شدن از آلارم که احتمالا بالاست)
-    panel.style.cssText = `
-        position: fixed !important;
-        bottom: 20px !important; 
-        right: 20px !important;
-        width: 350px !important;
-        background: #ffffff !important;
-        padding: 20px !important;
-        border-radius: 15px !important;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.3) !important;
-        z-index: 1000 !important; 
-        border: 1px solid #ddd !important;
-    `;
+    panel.style.cssText = "position:fixed !important; bottom:20px !important; right:20px !important; width:350px !important; background:white !important; padding:20px !important; border-radius:15px !important; box-shadow:0 5px 15px rgba(0,0,0,0.3) !important; z-index:1000 !important; border:1px solid #ddd !important;";
 
     function render() {
         const u = ui[lang];
