@@ -29,8 +29,6 @@ link:https://amiralitanaomi2015-web.github.io/Orite/
 - رابط کاربری ساده و کاربرپسند.
 
 
-## Version link v0.1.0
-link:https://github.com/amiralitanaomi2015-web/Orite/releases/tag/v0.1.0
 
 ## How to use
 1. Clone this repository.
