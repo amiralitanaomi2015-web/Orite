@@ -91,7 +91,7 @@
                 .then(geo => {
                     const lat = parseFloat(geo.latitude) || 35.6892;
                     const lon = parseFloat(geo.longitude) || 51.3890;
-                    const city = geo.city || "Tehran";
+                    const city = "Tehran";
                     const country = geo.country || "Iran";
 
                     if(weatherPanel.querySelector('#loc-val'))
