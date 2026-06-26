@@ -1,141 +1,13 @@
-(function() {
-    // ۱. پاکسازی پنل قبلی
-    const existing = document.getElementById('orite-notes-panel');
-    if (existing) existing.remove();
-
-    // ۲. دیکشنری ۱۱ زبانه
-    const dict = {
-        fa: { title: "یادداشت پیشرفته", titlePlaceholder: "عنوان یادداشت...", descPlaceholder: "توضیحات خود را اینجا بنویسید...", upload: "آپلود فایل", save: "ذخیره در لیست", del: "پاک‌سازی فرم", empty: "یادداشتی ثبت نشده است", logDel: "حذف" },
-        en: { title: "Advanced Notes", titlePlaceholder: "Note title...", descPlaceholder: "Type your note here...", upload: "Upload File", save: "Save to List", del: "Clear Form", empty: "No notes saved yet", logDel: "Delete" },
-        tr: { title: "Gelişmiş Notlar", titlePlaceholder: "Not başlığı...", descPlaceholder: "Notunuzu buraya yazın...", upload: "Dosya Yükle", save: "Listeye Kaydet", del: "Formu Temizle", empty: "Henüz not kaydedilmedi", logDel: "Sil" },
-        ar: { title: "ملاحظات متقدمة", titlePlaceholder: "عنوان الملاحظة...", descPlaceholder: "اكتب ملاحظتك هنا...", upload: "رفع ملف", save: "حفظ في القائمة", del: "مسح النموذج", empty: "لا توجد ملاحظات محفوظة", logDel: "حذف" },
-        ku: { title: "Têbîniyên Pêşketî", titlePlaceholder: "Navê têbîniyê...", descPlaceholder: "Têbîniya xwe li vir binivîse...", upload: "Peldankê bar bike", save: "Tomar bike", del: "Formê vala bike", empty: "Tu têbînî nehatine tomarkirin", logDel: "Jê bibe" },
-        zh: { title: "高级笔记", titlePlaceholder: "笔记标题...", descPlaceholder: "在此处输入您的笔记...", upload: "上传文件", save: "保存到列表", del: "清除表单", empty: "暂无保存的笔记", logDel: "删除" },
-        ko: { title: "고급 메모", titlePlaceholder: "메모 제목...", descPlaceholder: "여기에 메모를 입력하세요...", upload: "파일 업로드", save: "목록에 저장", del: "양식 지우기", empty: "저장된 메모 없음", logDel: "삭제" },
-        fr: { title: "Notes avancées", titlePlaceholder: "Titre de la note...", descPlaceholder: "Écrivez votre note ici...", upload: "Téléverser", save: "Enregistrer", del: "Vider le formulaire", empty: "Aucune note enregistrée", logDel: "Supprimer" },
-        de: { title: "Erweiterte Notizen", titlePlaceholder: "Notiztitel...", descPlaceholder: "Schreiben Sie Ihre Notiz hier...", upload: "Datei hochladen", save: "Zur Liste speichern", del: "Formular löschen", empty: "Keine Notizen gespeichert", logDel: "Löschen" },
-        it: { title: "Note avanzate", titlePlaceholder: "Titolo della nota...", descPlaceholder: "Scrivi la tua nota qui...", upload: "Carica file", save: "Salva nella lista", del: "Cancella modulo", empty: "Nessuna nota salvata", logDel: "Elimina" },
-        es: { title: "Notas avanzadas", titlePlaceholder: "Título de la nota...", descPlaceholder: "Escribe tu nota aquí...", upload: "Subir archivo", save: "Guardar en lista", del: "Limpiar formulario", empty: "No hay notas guardadas", logDel: "Eliminar" }
-    };
-
-    let lang = 'fa';
-
-    const notesPanel = document.createElement('div');
-    notesPanel.id = 'orite-notes-panel';
-    notesPanel.style.cssText = "background:#ffffff !important; padding:15px !important; border-radius:15px !important; box-shadow:0 4px 15px rgba(0,0,0,0.15) !important; border:1px solid #e0e0e0 !important; font-family:Tahoma, Arial, sans-serif !important; color:#333 !important; width:510px !important; margin-top:20px !important;";
-
-    function render() {
-        const d = dict[lang];
-        notesPanel.innerHTML = `
-            <select id="lang-sel-notes" style="width:100%; padding:5px; margin-bottom:10px; border-radius:5px; border:1px solid #ddd;">
-                ${Object.keys(dict).map(l => `<option value="${l}" ${l===lang?'selected':''}>${l.toUpperCase()}</option>`).join('')}
-            </select>
-            <h3 style="margin:0 0 10px 0;">${d.title}</h3>
-            
-            <input type="text" id="note-title-input" placeholder="${d.titlePlaceholder}" style="width:95%; padding:8px; border:1px solid #ddd; border-radius:5px; outline:none; margin-bottom:10px; font-family:inherit;">
-            
-            <textarea id="notes-textarea" placeholder="${d.descPlaceholder}" style="width:95%; height:70px; padding:8px; border:1px solid #ddd; border-radius:5px; outline:none; resize:none; font-family:inherit; margin-bottom:10px;"></textarea>
-            
-            <div style="margin-bottom:10px; font-size:13px;">
-                <label style="display:block; margin-bottom:3px; color:#666;">${d.upload}:</label>
-                <input type="file" id="note-file" style="width:100%; padding:3px; border:1px solid #eee; border-radius:5px; background:#f9f9f9;">
-                <span id="file-info" style="font-size:11px; color:#007bff; display:block; margin-top:3px;"></span>
-            </div>
-            
-            <div style="display:flex; gap:5px; margin-bottom:15px;">
-                <button id="save-notes-btn" style="flex:2; padding:8px; cursor:pointer; background:#28a745; color:white; border:none; border-radius:5px; font-weight:bold;">${d.save}</button>
-                <button id="clear-notes-btn" style="flex:1; padding:8px; cursor:pointer; background:#6c757d; color:white; border:none; border-radius:5px; font-size:12px;">${d.del}</button>
-            </div>
-
-            <div style="border-top:1px solid #eee; padding-top:10px;">
-                <h4 style="margin:0 0 8px 0; font-size:13px; color:#555;">لیست یادداشت‌ها:</h4>
-                <ul id="notes-list" style="list-style-type:none; padding:0; margin:0; max-height:140px; overflow-y:auto;">
-                    <i style="color:#888; font-size:12px;" id="empty-notes-msg">${d.empty}</i>
-                </ul>
-            </div>
-        `;
-
-        // نمایش نام فایل انتخابی
-        notesPanel.querySelector('#note-file').onchange = (e) => {
-            const file = e.target.files[0];
-            notesPanel.querySelector('#file-info').innerText = file ? `فایل: ${file.name}` : '';
-        };
-
-        // تغییر زبان
-        notesPanel.querySelector('#lang-sel-notes').onchange = (e) => {
-            lang = e.target.value;
-            render();
-        };
-
-        // افزودن یادداشت به لیست پایین پنل
-        notesPanel.querySelector('#save-notes-btn').onclick = () => {
-            const title = notesPanel.querySelector('#note-title-input').value.trim();
-            const desc = notesPanel.querySelector('#notes-textarea').value.trim();
-            const fileInput = notesPanel.querySelector('#note-file');
-            
-            if (title === "" && desc === "") return;
-
-            const emptyMsg = notesPanel.querySelector('#empty-notes-msg');
-            if (emptyMsg) emptyMsg.remove();
-
-            const now = new Date().toLocaleString(lang);
-            const fileName = fileInput.files[0] ? `📎 ${fileInput.files[0].name}` : '';
-
-            const li = document.createElement('li');
-            li.style.cssText = "padding:8px; border-bottom:1px solid #f1f1f1; display:flex; flex-direction:column; gap:4px; font-size:13px;";
-            
-            li.innerHTML = `
-                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                    <div style="width:85%;">
-                        <b style="display:block; color:#0056b3;">${title || "بدون عنوان"}</b>
-                        <span style="word-break:break-word;">${desc.replace(/\n/g, '<br>')}</span>
-                        <span style="display:block; font-size:11px; color:#666; margin-top:2px;">${fileName}</span>
-                    </div>
-                    <button class="del-log-btn" style="background:#dc3545; color:white; border:none; border-radius:3px; padding:3px 5px; cursor:pointer; font-size:10px;">${d.logDel}</button>
-                </div>
-                <span style="font-size:8.5px; color:#999; text-align:right;">🕒 ${now}</span>
-            `;
-
-            // حذف یادداشت از لیست
-            li.querySelector('.del-log-btn').onclick = () => {
-                li.remove();
-                if (notesPanel.querySelector('#notes-list').children.length === 0) {
-                    notesPanel.querySelector('#notes-list').innerHTML = `<i style="color:#888; font-size:12px;" id="empty-notes-msg">${dict[lang].empty}</i>`;
-                }
-            };
-
-            notesPanel.querySelector('#notes-list').appendChild(li);
-            
-            // پاکسازی فرم ورودی پس از ثبت
-            notesPanel.querySelector('#note-title-input').value = '';
-            notesPanel.querySelector('#notes-textarea').value = '';
-            fileInput.value = '';
-            notesPanel.querySelector('#file-info').innerText = '';
-        };
-
-        // پاک‌سازی فرم
-        notesPanel.querySelector('#clear-notes-btn').onclick = () => {
-            notesPanel.querySelector('#note-title-input').value = '';
-            notesPanel.querySelector('#notes-textarea').value = '';
-            notesPanel.querySelector('#note-file').value = '';
-            notesPanel.querySelector('#file-info').innerText = '';
-        };
-    }
-
-    document.body.appendChild(notesPanel);
-    render();
-})();
-
-(function() {
+(function () {
     // پاکسازی پنل یا صفحه قبلی در صورت باز بودن
     const existingScreen = document.getElementById('orite-3d-diary-overlay');
     if (existingScreen) existingScreen.remove();
 
-    // ۱. دیکشنری ۱۷ زبانه (۱۶ زبان قبل + چوکی)
+    // ۱. دیکشنری ۱۷ زبانه
     const dict = {
         en: { title: "Orite 3D Smart Diary", langLabel: "Language", addBtn: "➕ Add Note", saveBtn: "💾 Save", deleteBtn: "🗑️ Delete", prevBtn: "◀ Prev Page", nextBtn: "▶ Next Page", placeholder: "Write your thoughts in 3D...", empty: "No notes on this page", charTitle: "Orite Smart Diary", backBtn: "❌ Close Diary" },
         fa: { title: "دفترچه خاطرات سه‌بعدی اوریت", langLabel: "زبان", addBtn: "➕ افزودن یادداشت", saveBtn: "💾 ذخیره", deleteBtn: "🗑️ حذف", prevBtn: "◀ صفحه قبل", nextBtn: "صفحه بعد ▶", placeholder: "افکار خود را به صورت سه‌بعدی بنویسید...", empty: "یادداشتی در این صفحه وجود ندارد", charTitle: "دفترچه خاطرات هوشمند اوریت", backBtn: "❌ بستن دفترچه" },
-        hy: { title: "Orite 3D խելացի օրագիր", langLabel: "Լեզու", addBtn: "➕ Ավելացնել գրառում", saveBtn: "💾 Պահպանել", deleteBtn: "🗑️ ջնջել", prevBtn: "◀ Նախորդ", nextBtn: "Հաջորդ ▶", placeholder: "Գրեք ձեր մտքերը 3D ձևաչափով...", empty: "Այս էջում գրառումներ չկան", charTitle: "Orite խելացի օրագիր", backBtn: "❌ Փակել օրագիրը" },
+        hy: { title: "Orite 3D խելացի օրագիր", langLabel: "Լեզու", addBtn: "➕ Ավելացնել գրառում", saveBtn: "💾 Պահپанел", deleteBtn: "🗑️ ջնջел", prevBtn: "◀ Նախорд", nextBtn: "Հаջорд ▶", placeholder: "Гրեք ձеր мտقерн 3D формаовтом...", empty: "Айс еջум грар умнер чкан", charTitle: "Orite खेлаци оражир", backBtn: "❌ Փакел орагиро" },
         ar: { title: "يوميات أوريت الذكية ثلاثية الأبعاد", langLabel: "لغة", addBtn: "➕ إضافة ملاحظة", saveBtn: "💾 حفظ", deleteBtn: "🗑️ حذف", prevBtn: "◀ الصفحة السابقة", nextBtn: "الصفحة التالية ▶", placeholder: "اكتب أفكارك بشكل ثلاثي الأبعاد...", empty: "لا توجد ملاحظات في هذه الصفحة", charTitle: "يوميات أوريت الذكية", backBtn: "❌ إغلاق اليوميات" },
         tr: { title: "Orite 3D Akıllı Günlük", langLabel: "Dil", addBtn: "➕ Not Ekle", saveBtn: "💾 Kaydet", deleteBtn: "🗑️ Sil", prevBtn: "◀ Önceki Sayfa", nextBtn: "Sonraki Sayfa ▶", placeholder: "Düşüncelerinizi 3D olarak yazın...", empty: "Bu sayfada not yok", charTitle: "Orite Akıllı Günlük", backBtn: "❌ Günlüğü Kapat" },
         ckb: { title: "نامیلکەی یادگاری هوشمەندی سێ ڕەهەندی ئۆریت", langLabel: "زمان", addBtn: "➕ زیادکردنی تێبینی", saveBtn: "💾 پاشەکەوتکردن", deleteBtn: "🗑️ سڕینەوە", prevBtn: "◀ لاپەڕەی پێشوو", nextBtn: "لاپەڕەی دواتر ▶", placeholder: "بیرکردنەوەکانت بە شێوازی سێ ڕەهەندی بنووسە...", empty: "هیچ تێبینییەک لەم لاپەڕەیەدا نییە", charTitle: "نامیلکەی یادگاری ئۆریت", backBtn: "❌ داخستنی نامیلکە" },
@@ -153,11 +25,11 @@
     };
 
     let currentLang = localStorage.getItem('orite_hub_lang') || 'fa';
-    let diaryColor = localStorage.getItem('orite_diary_color') || 'pink'; // رنگ پیش‌فرض صورتی
+    let diaryColor = localStorage.getItem('orite_diary_color') || 'pink';
     let pages = JSON.parse(localStorage.getItem('orite_diary_pages') || '[""]');
     let currentPageIndex = 0;
 
-    // ایجاد لایه محو شونده با انیمیشن ابری
+    // ایجاد لایه اصلی
     const overlay = document.createElement('div');
     overlay.id = 'orite-3d-diary-overlay';
     overlay.style.cssText = `
@@ -169,7 +41,7 @@
         backdrop-filter: blur(8px);
     `;
 
-    // اضافه شدن انیمیشن ابرهای پس‌زمینه
+    // استایل‌های انیمیشن
     const styleSheet = document.createElement("style");
     styleSheet.type = "text/css";
     styleSheet.innerText = `
@@ -204,6 +76,10 @@
             50% { filter: drop-shadow(0 0 15px #fbbf24); }
         }
         .orite-lightning-hit { animation: lightningStrike 0.2s ease-in-out 3; }
+        @keyframes catBounce {
+            0% { transform: translateY(0) rotate(-3deg); }
+            100% { transform: translateY(-8px) rotate(3deg); }
+        }
     `;
     document.head.appendChild(styleSheet);
 
@@ -212,29 +88,24 @@
         <div class="orite-cloud-anim2"></div>
     `;
 
-    // حالت‌های سه‌بعدی متن بزرگ بالایی بر اساس ساعت سیستم کاربر
+    // کانتینر متن بزرگ بالایی
     const techTextContainer = document.createElement('div');
     techTextContainer.style.cssText = "position:absolute; top:20px; text-align:center; z-index:10; width:100%;";
-    
-    // کاراکتر گربه شیطون بالای متن در شب
+
+    // کاراکتر گربه (برای شب)
     const catWrapper = document.createElement('div');
     catWrapper.style.cssText = "display:none; justify-content:center; margin-bottom:-10px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));";
-    catWrapper.innerHTML = `
-        <div style="font-size:45px; transform-origin: center; animation: catBounce 2s infinite alternate;">🐱<span style="font-size:20px; position:absolute; top:-5px; right:40%;">✨</span></div>
-    `;
-    const catStyle = document.createElement("style");
-    catStyle.innerText = `@keyframes catBounce { 0% { transform: translateY(0) rotate(-3deg); } 100% { transform: translateY(-8px) rotate(3deg); } }`;
-    document.head.appendChild(catStyle);
+    catWrapper.innerHTML = `<div style="font-size:45px; transform-origin: center; animation: catBounce 2s infinite alternate;">🐱<span style="font-size:20px; position:absolute; top:-5px; right:40%;">✨</span></div>`;
 
     const heading3D = document.createElement('h1');
     heading3D.className = "orite-tech-text";
     heading3D.style.cssText = "font-size:32px; font-weight:900; color:#ffffff; margin:0; perspective: 500px; transform-style: preserve-3d; transition: all 0.5s ease;";
-    
+
     techTextContainer.appendChild(catWrapper);
     techTextContainer.appendChild(heading3D);
     overlay.appendChild(techTextContainer);
 
-    // پنل کنترل خارجی (انتخاب زبان + انتخاب رنگ دفترچه + دکمه بستن) خارج از دفترچه
+    // پنل کنترل خارجی
     const externalControlPanel = document.createElement('div');
     externalControlPanel.style.cssText = `
         display: flex; gap: 20px; align-items: center; margin-bottom: 20px; z-index: 10;
@@ -243,7 +114,7 @@
         box-shadow: 0 10px 25px rgba(0,0,0,0.3);
     `;
 
-    // لیست کشویی سه‌بعدی و هوشمند انتخاب زبان
+    // انتخاب زبان
     const langBox = document.createElement('div');
     langBox.style.cssText = "display:flex; align-items:center; gap:8px; color:#fff; font-size:13px; font-weight:600; text-transform:uppercase;";
     langBox.innerHTML = `
@@ -253,7 +124,6 @@
             padding: 8px 16px; border-radius: 20px; border: 1px solid #38bdf8;
             cursor: pointer; font-weight: bold; font-size: 13px; outline: none;
             box-shadow: 0 4px 12px rgba(56,189,248,0.2); transition: all 0.3s;
-            transform-style: preserve-3d;
         ">
             <option value="fa">فارسی (FA)</option>
             <option value="en">English (EN)</option>
@@ -274,28 +144,23 @@
             <option value="hr">Hrvatski (HR)</option>
         </select>
     `;
-    
+
     const langSelect = langBox.querySelector('#orite-diary-lang');
     langSelect.value = currentLang;
 
-    // افکت درخشش سه‌بعدی هنگام هاور روی لیست زبان و شوک الکتریکی هنگام انتخاب
     langSelect.onmouseover = () => {
         langSelect.style.boxShadow = "0 0 20px #38bdf8, 0 0 30px #0284c7";
         langSelect.style.borderColor = "#bae6fd";
-        langSelect.style.transform = "translateZ(10px)";
     };
     langSelect.onmouseout = () => {
-        if (!langSelect.classList.contains("orite-lightning-hit")) {
-            langSelect.style.boxShadow = "0 4px 12px rgba(56,189,248,0.2)";
-            langSelect.style.borderColor = "#38bdf8";
-            langSelect.style.transform = "translateZ(0)";
-        }
+        langSelect.style.boxShadow = "0 4px 12px rgba(56,189,248,0.2)";
+        langSelect.style.borderColor = "#38bdf8";
     };
     langSelect.onchange = (e) => {
         currentLang = e.target.value;
         localStorage.setItem('orite_hub_lang', currentLang);
-        
-        // افکت رعد و برق سه‌بعدی هوشمند هنگام انتخاب زبان
+
+        // افکت رعد و برق هنگام انتخاب زبان
         langSelect.classList.add("orite-lightning-hit");
         langSelect.style.background = "#fbbf24";
         langSelect.style.color = "#000";
@@ -308,20 +173,21 @@
         }, 600);
 
         applyLanguageTexts();
+        updateTopTextStatus(); // به‌روزرسانی متن هدر هنگام تغییر زبان
     };
     externalControlPanel.appendChild(langBox);
 
-    // ردیف انتخاب رنگ دفترچه خاطرات (سبز - آبی - صورتی)
+    // انتخابگر رنگ دفترچه
     const colorPickerWrapper = document.createElement('div');
     colorPickerWrapper.style.cssText = "display:flex; gap:8px; align-items:center;";
     colorPickerWrapper.innerHTML = `
         <div style="color:#94a3b8; font-size:11px; font-weight:bold;" id="orite-color-lbl">Color:</div>
-        <button class="color-picker-btn" data-color="pink" style="width:26px; height:26px; border-radius:50%; background:#f472b6; border:2px solid ${diaryColor==='pink'?'#fff':'transparent'}; cursor:pointer; box-shadow:0 0 8px #f472b688; transition:0.2s;"></button>
-        <button class="color-picker-btn" data-color="blue" style="width:26px; height:26px; border-radius:50%; background:#38bdf8; border:2px solid ${diaryColor==='blue'?'#fff':'transparent'}; cursor:pointer; box-shadow:0 0 8px #38bdf888; transition:0.2s;"></button>
-        <button class="color-picker-btn" data-color="green" style="width:26px; height:26px; border-radius:50%; background:#4ade80; border:2px solid ${diaryColor==='green'?'#fff':'transparent'}; cursor:pointer; box-shadow:0 0 8px #4ade8088; transition:0.2s;"></button>
+        <button class="color-picker-btn" data-color="pink" style="width:26px; height:26px; border-radius:50%; background:#f472b6; border:2px solid ${diaryColor === 'pink' ? '#fff' : 'transparent'}; cursor:pointer; box-shadow:0 0 8px #f472b688; transition:0.2s;"></button>
+        <button class="color-picker-btn" data-color="blue" style="width:26px; height:26px; border-radius:50%; background:#38bdf8; border:2px solid ${diaryColor === 'blue' ? '#fff' : 'transparent'}; cursor:pointer; box-shadow:0 0 8px #38bdf888; transition:0.2s;"></button>
+        <button class="color-picker-btn" data-color="green" style="width:26px; height:26px; border-radius:50%; background:#4ade80; border:2px solid ${diaryColor === 'green' ? '#fff' : 'transparent'}; cursor:pointer; box-shadow:0 0 8px #4ade8088; transition:0.2s;"></button>
     `;
-    
-    // کانتینر اصلی دفترچه خاطرات سه‌بعدی
+
+    // کانتینر دفترچه
     const diaryBook = document.createElement('div');
     diaryBook.style.cssText = `
         width: 460px; height: 350px; border-radius: 20px; padding: 35px;
@@ -331,28 +197,38 @@
         border: 2px solid rgba(255,255,255,0.2);
     `;
 
+    // textarea باید قبل از updateDiaryStyle تعریف شود
+    const diaryTextarea = document.createElement('textarea');
+    diaryTextarea.style.cssText = `
+        width: 90%; height: 170px; border-radius: 12px; padding: 15px; resize: none;
+        font-size: 14px; font-family: inherit; font-weight: 500;
+        outline: none; box-shadow: inset 0 2px 8px rgba(0,0,0,0.05);
+        border: 1px solid; transition: all 0.3s ease;
+    `;
+    diaryTextarea.onfocus = () => diaryTextarea.style.boxShadow = "0 0 12px rgba(0,0,0,0.1), inset 0 2px 8px rgba(0,0,0,0.05)";
+    diaryTextarea.onblur = () => diaryTextarea.style.boxShadow = "inset 0 2px 8px rgba(0,0,0,0.05)";
+
+    // FIX: تابع updateDiaryStyle اکنون بعد از تعریف diaryTextarea قرار دارد
     function updateDiaryStyle(colorKey) {
         diaryColor = colorKey;
         localStorage.setItem('orite_diary_color', colorKey);
-        
+
         let bgStyle = "";
-        let textCol = "#1e293b";
-        let inputBg = "rgba(255,255,255,0.7)";
-        let borderCol = "rgba(0,0,0,0.1)";
+        const textCol = "#1e293b";
+        const inputBg = "rgba(255,255,255,0.7)";
+        const borderCol = "rgba(0,0,0,0.1)";
 
         if (colorKey === 'green') {
             bgStyle = "linear-gradient(135deg, #dcfce7, #a7f3d0)";
         } else if (colorKey === 'blue') {
             bgStyle = "linear-gradient(135deg, #e0f2fe, #bae6fd)";
         } else {
-            // صورتی (رنگ عادی پیش‌فرض)
             bgStyle = "linear-gradient(135deg, #fce7f3, #fbcfe8)";
         }
 
         diaryBook.style.background = bgStyle;
         diaryBook.style.color = textCol;
-        
-        // به‌روزرسانی حاشیه دور دکمه‌های رنگ
+
         colorPickerWrapper.querySelectorAll('.color-picker-btn').forEach(btn => {
             if (btn.getAttribute('data-color') === colorKey) {
                 btn.style.border = "2px solid #ffffff";
@@ -363,11 +239,9 @@
             }
         });
 
-        if (diaryTextarea) {
-            diaryTextarea.style.background = inputBg;
-            diaryTextarea.style.borderColor = borderCol;
-            diaryTextarea.style.color = textCol;
-        }
+        diaryTextarea.style.background = inputBg;
+        diaryTextarea.style.borderColor = borderCol;
+        diaryTextarea.style.color = textCol;
     }
 
     colorPickerWrapper.querySelectorAll('.color-picker-btn').forEach(btn => {
@@ -375,7 +249,7 @@
     });
     externalControlPanel.appendChild(colorPickerWrapper);
 
-    // دکمه بستن دفترچه سه‌بعدی
+    // دکمه بستن
     const closeDiaryBtn = document.createElement('button');
     closeDiaryBtn.id = "orite-close-diary-btn";
     closeDiaryBtn.style.cssText = `
@@ -394,8 +268,7 @@
 
     overlay.appendChild(externalControlPanel);
 
-    //  - برچسب بصری برای توضیح ساختار سه بعدی دفترچه
-    // محتویات داخل دفترچه خاطرات سه بعدی
+    // محتویات داخل دفترچه
     const diaryHeader = document.createElement('div');
     diaryHeader.style.cssText = "display:flex; justify-content:space-between; align-items:center; border-bottom:2px dashed rgba(0,0,0,0.15); padding-bottom:8px;";
     diaryHeader.innerHTML = `
@@ -403,23 +276,12 @@
         <span style="font-size: 24px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));">🤖✨</span>
     `;
 
-    const diaryTextarea = document.createElement('textarea');
-    diaryTextarea.style.cssText = `
-        width: 90%; height: 170px; border-radius: 12px; padding: 15px; resize: none;
-        font-size: 14px; font-family: inherit; font-weight: 500;
-        outline: none; box-shadow: inset 0 2px 8px rgba(0,0,0,0.05);
-        border: 1px solid; transition: all 0.3s ease;
-    `;
-    diaryTextarea.onfocus = () => diaryTextarea.style.boxShadow = "0 0 12px rgba(0,0,0,0.1), inset 0 2px 8px rgba(0,0,0,0.05)";
-    diaryTextarea.onblur = () => diaryTextarea.style.boxShadow = "inset 0 2px 8px rgba(0,0,0,0.05)";
-
     const diaryFooter = document.createElement('div');
     diaryFooter.style.cssText = "display:flex; justify-content:space-between; align-items:center; gap:8px;";
 
-    // دکمه‌های ورق زدن برگه و مدیریت
     const pageNavWrapper = document.createElement('div');
     pageNavWrapper.style.cssText = "display:flex; gap:6px;";
-    
+
     const prevPageBtn = document.createElement('button');
     prevPageBtn.id = "orite-diary-prev";
     prevPageBtn.style.cssText = "background:rgba(0,0,0,0.1); border:none; border-radius:8px; padding:6px 12px; font-size:11px; font-weight:bold; cursor:pointer; color:#334155; transition:0.2s;";
@@ -462,7 +324,8 @@
     addNoteBtn.onmouseout = () => addNoteBtn.style.transform = "translateY(0)";
     addNoteBtn.onclick = () => {
         saveCurrentPage();
-        alert("✨ یادداشت هوشمند شما ثبت و ذخیره شد!");
+        const d = dict[currentLang] || dict['fa'];
+        alert("✨ " + (d.saveBtn || "ذخیره شد"));
     };
 
     const pageIndicator = document.createElement('span');
@@ -478,62 +341,67 @@
 
     overlay.appendChild(diaryBook);
 
-    // توابع لود، ذخیره صفحات و متن های دفترچه
+    // FIX: تابع saveCurrentPage
     function saveCurrentPage() {
         pages[currentPageIndex] = diaryTextarea.value;
         localStorage.setItem('orite_diary_pages', JSON.stringify(pages));
     }
 
+    // FIX: تابع loadPage
     function loadPage() {
         diaryTextarea.value = pages[currentPageIndex] || "";
         pageIndicator.innerText = `📄 ${currentPageIndex + 1} / ${pages.length}`;
         prevPageBtn.disabled = (currentPageIndex === 0);
     }
 
+    // FIX: تابع applyLanguageTexts کامل شد - تمام متون UI رو به‌روز می‌کنه
     function applyLanguageTexts() {
         const d = dict[currentLang] || dict['fa'];
-        document.getElementById('orite-lang-label').innerText = d.langLabel + ":";
-        document.getElementById('orite-close-diary-btn').innerText = d.backBtn;
-        document.getElementById('orite-diary-title').querySelector('span').innerText = d.title;
-        diaryTextarea.placeholder = d.placeholder;
-        addNoteBtn.innerText = d.addBtn;
-        prevPageBtn.innerText = d.prevBtn;
-        nextPageBtn.innerText = d.nextBtn;
-        document.getElementById('orite-color-lbl').innerText = (currentLang === 'fa' ? 'رنگ:' : (currentLang === 'hy' ? 'Գույն:' : 'Color:'));
-        
-        // هندل کردن حالت‌های متنی بالای صفحه به صورت زنده
-        updateTopTextStatus();
+
+        // عنوان دفترچه
+        const titleSpan = document.querySelector('#orite-diary-title span');
+        if (titleSpan) titleSpan.innerText = d.title;
+
+        // placeholder
+        if (diaryTextarea) diaryTextarea.placeholder = d.placeholder;
+
+        // دکمه‌ها
+        if (prevPageBtn) prevPageBtn.innerText = d.prevBtn;
+        if (nextPageBtn) nextPageBtn.innerText = d.nextBtn;
+        if (addNoteBtn) addNoteBtn.innerText = d.addBtn;
+        if (closeDiaryBtn) closeDiaryBtn.innerText = d.backBtn;
+
+        // برچسب زبان
+        const langLabel = document.getElementById('orite-lang-label');
+        if (langLabel) langLabel.innerText = d.langLabel + ":";
     }
 
-    // منطق اختصاصی و کاملا هوشمند حالت‌های متنی هدر بر اساس ساعت سیستم کاربر
+    // FIX: تابع updateTopTextStatus - متغیر hour و d اکنون درون تابع تعریف شده‌اند
     function updateTopTextStatus() {
         const d = dict[currentLang] || dict['fa'];
         const hour = new Date().getHours();
-        const catNode = overlay.querySelector('.orite-cloud-anim1').previousElementSibling; // Cat Element Check
-        
         let headerState = "";
-        
-        // فعال شدن گربه شیطون بالای متن در شب (ساعت ۲۰ الی ۶ صبح)
+
+        // نمایش یا پنهان کردن گربه در شب
         if (hour >= 20 || hour < 6) {
             catWrapper.style.display = "flex";
         } else {
             catWrapper.style.display = "none";
         }
 
-        // سناریوهای زمانی تکنولوژیک کاراکتر جالب سه‌بعدی
+        // سناریوهای زمانی
         if (hour >= 6 && hour < 9) {
-            headerState = (currentLang === 'fa' ? "☀️ بیدار شدن از خواب! صبح بخیر..." : (currentLang === 'hy' ? "☀️ Արթնանալ! Բարի լույս..." : "☀️ Waking up! Good morning..."));
+            headerState = (currentLang === 'fa' ? "☀️ بیدار شدن از خواب! صبح بخیر..." : (currentLang === 'hy' ? "☀️ Արthնанал! Бари луйс..." : "☀️ Waking up! Good morning..."));
         } else if (hour >= 9 && hour < 12) {
-            headerState = (currentLang === 'fa' ? "☕ قهوه خوردن و آماده‌سازی برای یک روز عالی" : (currentLang === 'hy' ? "☕ Սուրճ խմել և պատրաստվել հիանալի օրվան" : "☕ Drinking coffee, preparing for a great day"));
+            headerState = (currentLang === 'fa' ? "☕ قهوه خوردن و آماده‌سازی برای یک روز عالی" : (currentLang === 'hy' ? "☕ Сурч хмел ев патраствел" : "☕ Drinking coffee, preparing for a great day"));
         } else if (hour >= 12 && hour < 14) {
-            headerState = (currentLang === 'fa' ? "🍔 خوردن همبرگر خوشمزه" : (currentLang === 'hy' ? "🍔 Համեղ համբուրգեր ուտելը" : "🍔 Eating a delicious burger"));
+            headerState = (currentLang === 'fa' ? "🍔 خوردن همبرگر خوشمزه" : (currentLang === 'hy' ? "🍔 Համеղ햄бургер утел" : "🍔 Eating a delicious burger"));
         } else if (hour >= 14 && hour < 17) {
-            headerState = (currentLang === 'fa' ? "📱 در حال کار کردن با گوشی" : (currentLang === 'hy' ? "📱 Հեռախոսով աշխատել" : "📱 Working with the phone"));
+            headerState = (currentLang === 'fa' ? "📱 در حال کار کردن با گوشی" : (currentLang === 'hy' ? "📱 헤ракхосов ашхател" : "📱 Working with the phone"));
         } else if (hour >= 17 && hour < 20) {
-            headerState = (currentLang === 'fa' ? "🥳 شادی کردن بعد از یک روز کاری" : (currentLang === 'hy' ? "🥳 Ուրախանալ աշխատանքային օրվանից հետո" : "🥳 Joyful after a workday"));
+            headerState = (currentLang === 'fa' ? "🥳 شادی کردن بعد از یک روز کاری" : (currentLang === 'hy' ? "🥳 Урахanал ашхатанкаин оривниц хето" : "🥳 Joyful after a workday"));
         } else {
-            // شب (ساعت ۲۰ تا ۶) - حالت ابری، خستگی یا تفکر
-            headerState = (currentLang === 'fa' ? "🤔 فکر کردن به ایده‌های جدید در شب" : (currentLang === 'hy' ? "🤔 Նոր գաղափարների մասին մտածելը գիշերը" : "🤔 Thinking about new ideas at night"));
+            headerState = (currentLang === 'fa' ? "🤔 فکر کردن به ایده‌های جدید در شب" : (currentLang === 'hy' ? "🤔 Нор гагафарнери масин мтадзел гишерын" : "🤔 Thinking about new ideas at night"));
         }
 
         heading3D.innerHTML = `
@@ -544,27 +412,29 @@
         `;
     }
 
-    // چرخه تغییر حالت‌های سه‌بعدی متن بزرگ بالایی مانند یک بازی جذاب (هر 10 ثانیه)
+    // چرخه تغییر حالت‌های متن هدر (هر ۱۰ ثانیه)
     const statesList = [
-        "🔥 آتیش گرفتن (محاسبه و پردازش سریع)", "⚡ رعد برق زدن (تحلیل هوش مصنوعی)", 
-        "☁️ ابری شدن (در حال ارتباط با سرور)", "🌧️ بارانی شدن (ذخیره اطلاعات)", 
-        "❄️ برفی شدن (اسکن امنیتی حافظه)", "🌵 خشک شدن (صرفه‌جویی در مصرف باتری)", 
-        "😲 تعجب کردن از خلاقیت شما", "🤯 حرکات عجیب در آوردن", 
+        "🔥 آتیش گرفتن (محاسبه و پردازش سریع)", "⚡ رعد برق زدن (تحلیل هوش مصنوعی)",
+        "☁️ ابری شدن (در حال ارتباط با سرور)", "🌧️ بارانی شدن (ذخیره اطلاعات)",
+        "❄️ برفی شدن (اسکن امنیتی حافظه)", "🌵 خشک شدن (صرفه‌جویی در مصرف باتری)",
+        "😲 تعجب کردن از خلاقیت شما", "🤯 حرکات عجیب در آوردن",
         "📴 بدون اینترنت بودن (آفلاین)", "📸 عکس گرفتن از صفحه"
     ];
 
     let stateIndex = 0;
     setInterval(() => {
         const stateText = statesList[stateIndex];
-        const baseMsg = (currentLang === 'fa' ? "دفترچه خاطرات هوشمند سه بعدی می‌خوای؟ فقط اوریت! راستی، سلام من اوریک سیستم، هوش مصنوعی اوریت هستم." : 
-                        (currentLang === 'ckb' ? "نامیلکەی یادگاری هوشمەندی سێ ڕەهەندی دەوێت؟ تەنها ئۆریت! بەخێر بێیت، من ئۆریک سیستم، هۆشی دەستکردی ئۆریتم." : 
-                        "Want 3D smart diary? Just Orite! By the way, hello, I am Oric system, Orite's AI."));
-        
+        const baseMsg = (currentLang === 'fa'
+            ? "دفترچه خاطرات هوشمند سه بعدی می‌خوای؟ فقط اوریت! راستی، سلام من اوریک سیستم، هوش مصنوعی اوریت هستم."
+            : (currentLang === 'ckb'
+                ? "نامیلکەی یادگاری هوشمەندی سێ ڕەهەندی دەوێت؟ تەنها ئۆریت! بەخێر بێیت، من ئۆریک سیستم، هۆشی دەستکردی ئۆریتم."
+                : "Want 3D smart diary? Just Orite! By the way, hello, I am Oric system, Orite's AI."));
+
         heading3D.innerHTML = `
             <div style="font-size: 24px; color: #facc15;" class="orite-lightning-hit">${stateText}</div>
             <div style="font-size: 14px; font-weight: normal; color: #f1f5f9; margin-top: 6px;">${baseMsg}</div>
         `;
-        
+
         stateIndex = (stateIndex + 1) % statesList.length;
     }, 10000);
 
@@ -572,6 +442,7 @@
     updateDiaryStyle(diaryColor);
     loadPage();
     applyLanguageTexts();
+    updateTopTextStatus(); // FIX: اکنون بعد از تعریف فراخوانی می‌شود
 
     document.body.appendChild(overlay);
 })();

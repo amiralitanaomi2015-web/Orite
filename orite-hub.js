@@ -3,29 +3,29 @@
     const existingHub = document.getElementById('orite-smart-hub');
     if (existingHub) existingHub.remove();
 
-    // ۲. دیکشنری جامع ۱۵ زبانه (شامل مالایی و کرواتی)
+    // ۲. دیکشنری جامع ۱۵ زبانه
     const dict = {
         en: { title: "Orite Smart Hub", close: "✖", sections: "Hub Sections", tabGame: "Temp Quiz Game", tabNotes: "Sticky Notes", tabTools: "AI Tools", langSelect: "Select Language" },
-        fa: { title: "هاب هوشمند اوریت", close: "✖", sections: "بخش‌های هاب", tabGame: "مینی‌گیم حدس دما", tabNotes: "یادداشت‌های سریع", tabTools: "ابزارهای هوش مصنوعی", langSelect: "انتخاب زبان" },
-        ar: { title: "مركز أوريت الذكي", close: "✖", sections: "أقسام المركز", tabGame: "لعبة تخمين الحرارة", tabNotes: "ملاحظات لاصقة", tabTools: "أدوات الذكاء الاصطناعي", langSelect: "اختر اللغة" },
-        tr: { title: "Orite Akıllı Hub", close: "✖", sections: "Hub Bölümleri", tabGame: "Sıcaklık Tahmin Oyunu", tabNotes: "Yapışkan Notlar", tabTools: "Yapay Zeka Araçları", langSelect: "Dil Seçin" },
-        ku: { title: "Navenda Smart Orite", close: "✖", sections: "Beşên Navendê", tabGame: "Lîstika Texmîna Germahiyê", tabNotes: "Nîşeyên Zeliqok", tabTools: "Amûrên AI-ê", langSelect: "Ziman Hilbijêre" },
-        zh: { title: "Orite 智能中心", close: "✖", sections: "中心模块", tabGame: "温度竞猜游戏", tabNotes: "即时贴", tabTools: "人工智能工具", langSelect: "选择语言" },
-        ko: { title: "Orite 스마트 허브", close: "✖", sections: "허브 섹션", tabGame: "온도 추측 게임", tabNotes: "스티커 메모", tabTools: "AI 도구", langSelect: "언어 선택" },
-        es: { title: "Centro Inteligente Orite", close: "✖", sections: "Secciones", tabGame: "Juego de Adivinar Temperatura", tabNotes: "Notas Adhesivas", tabTools: "Herramientas de IA", langSelect: "Seleccionar idioma" },
-        it: { title: "Orite Smart Hub", close: "✖", sections: "Sezioni Hub", tabGame: "Gioco a Quiz sulla Temperatura", tabNotes: "Note Adesive", tabTools: "Strumenti AI", langSelect: "Seleziona lingua" },
-        fr: { title: "Orite Smart Hub", close: "✖", sections: "Sections du Hub", tabGame: "Jeu de Quiz sur la Température", tabNotes: "Notes Adhesives", tabTools: "Outils IA", langSelect: "Sélectionner la langue" },
-        ru: { title: "Умный хаб Orite", close: "✖", sections: "Разделы хаба", tabGame: "Игра на угадывание температуры", tabNotes: "Стикеры", tabTools: "Инструменты ИИ", langSelect: "Выбрать язык" },
-        he: { title: "Orite Smart Hub", close: "✖", sections: "קטעי הרכזת", tabGame: "משחק ניחוש טמפרטורה", tabNotes: "פתקיות דביקות", tabTools: "כלי בינה מלאכותית", langSelect: "בחר שפה" },
-        ja: { title: "Orite スマートハブ", close: "✖", sections: "ハブセクション", tabGame: "温度当てクイズゲーム", tabNotes: "付箋", tabTools: "AIツール", langSelect: "言語を選択" },
-        tg: { title: "Маркази интеллектуалии Orite", close: "✖", sections: "Қисмҳои марказ", tabGame: "Бозии тахмини ҳарорат", tabNotes: "Қайдҳои часпанда", tabTools: "Абзорҳои AI", langSelect: "Забонро интихоб кунед" },
-        ms: { title: "Hab Pintar Orite", close: "✖", sections: "Bahagian Hab", tabGame: "Permainan Teka Suhu", tabNotes: "Nota Lekit", tabTools: "Alat AI", langSelect: "Pilih Bahasa" },
-        hr: { title: "Orite Smart Hub", close: "✖", sections: "Sekcije Huba", tabGame: "Igra pogađanja temperature", tabNotes: "Ljepljive bilješke", tabTools: "AI alati", langSelect: "Odaberi jezik" }
+        fa: { title: "هاب هوشمند اوریت", close: "✖", sections: "بخش‌های هاب", tabGame: "مینی‌گیم حدس دما", tabNotes: "یادداشت‌های سریع", tabTools: "ابزارهای هوش مصنوعی", tabSelect: "انتخاب زبان" },
+        ar: { title: "مركز أوريت الذكي", close: "✖", sections: "أقسام المركز", tabGame: "لعبة تخمين الحرارة", tabNotes: "ملاحظات لاصقة", tabTools: "أدوات الذكاء الاصطناعي", tabSelect: "اختر اللغة" },
+        tr: { title: "Orite Akıllı Hub", close: "✖", sections: "Hub Bölümleri", tabGame: "Sıcaklık Tahmin Oyunu", tabNotes: "Yapışkan Notlar", tabTools: "Yapay Zeka Araçları", tabSelect: "Dil Seçin" },
+        ku: { title: "Navenda Smart Orite", close: "✖", sections: "Beşên Navendê", tabGame: "Lîstika Texmîna Germahiyê", tabNotes: "Nîşeyên Zeliqok", tabTools: "Amûrên AI-ê", tabSelect: "Ziman Hilbijêre" },
+        zh: { title: "Orite 智能中心", close: "✖", sections: "中心模块", tabGame: "温度竞猜游戏", tabNotes: "即时贴", tabTools: "人工智能工具", tabSelect: "选择语言" },
+        ko: { title: "Orite 스마트 허브", close: "✖", sections: "허브 섹션", tabGame: "온도 추측 게임", tabNotes: "스티커 메모", tabTools: "AI 도구", tabSelect: "언어 선택" },
+        es: { title: "Centro Inteligente Orite", close: "✖", sections: "Secciones", tabGame: "Juego de Adivinar Temperatura", tabNotes: "Notas Adhesivas", tabTools: "Herramientas de IA", tabSelect: "Seleccionar idioma" },
+        it: { title: "Orite Smart Hub", close: "✖", sections: "Sezioni Hub", tabGame: "Gioco a Quiz sulla Temperatura", tabNotes: "Note Adesive", tabTools: "Strumenti AI", tabSelect: "Seleziona lingua" },
+        fr: { title: "Orite Smart Hub", close: "✖", sections: "Sections du Hub", tabGame: "Jeu de Quiz sur la Température", tabNotes: "Notes Adhesives", tabTools: "Outils IA", tabSelect: "Sélectionner la langue" },
+        ru: { title: "Умный хаб Orite", close: "✖", sections: "Разделы хаба", tabGame: "Игра на угадывание температуры", tabNotes: "Стикеры", tabTools: "Инструменты ИИ", tabSelect: "Выбрать язык" },
+        he: { title: "Orite Smart Hub", close: "✖", sections: "קטעי הרכזת", tabGame: "משחק ניחוש טמפרטורה", tabNotes: "פתקיות דביקות", tabTools: "כלי בינה מלאכותית", tabSelect: "בחר שפה" },
+        ja: { title: "Orite スマートハブ", close: "✖", sections: "ハブセクション", tabGame: "温度当てクイズゲーム", tabNotes: "付箋", tabTools: "AIツール", tabSelect: "言語を選択" },
+        tg: { title: "Маркази интеллектуалии Orite", close: "✖", sections: "Қисмҳои марказ", tabGame: "Бозии тахмини ҳарорат", tabNotes: "Қайдҳои часпанда", tabTools: "Абзорҳои AI", tabSelect: "Забонро интихоб кунед" },
+        ms: { title: "Hab Pintar Orite", close: "✖", sections: "Bahagian Hab", tabGame: "Permainan Teka Suhu", tabNotes: "Nota Lekit", tabTools: "Alat AI", tabSelect: "Pilih Bahasa" },
+        hr: { title: "Orite Smart Hub", close: "✖", sections: "Sekcije Huba", tabGame: "Igra pogađanja temperature", tabNotes: "Ljepljive bilješke", tabTools: "AI alati", tabSelect: "Odaberi jezik" }
     };
 
     let lang = 'fa';
 
-    // ۳. ایجاد پنل داشبورد هاب سه‌بعدی و شیشه‌ای (موقعیت دقیقاً زیر نوار بالایی - با فاصله مطمئن از بالا)
+    // ۳. ایجاد پنل هاب
     const smartHub = document.createElement('div');
     smartHub.id = 'orite-smart-hub';
     smartHub.style.cssText = "background:#ffffff !important; padding:15px !important; border-radius:15px !important; box-shadow:0 4px 15px rgba(0,0,0,0.15) !important; border:1px solid #e0e0e0 !important; font-family:Tahoma, Arial, sans-serif !important; color:#333 !important; width:481px !important; margin-top:20px !important;";
@@ -67,45 +67,50 @@
         `;
 
         // تغییر زبان
-        smartHub.querySelector('#orite-hub-lang').onchange = (e) => {
-            lang = e.target.value;
-            renderHub();
-        };
+        const langSelectElem = smartHub.querySelector('#orite-hub-lang');
+        if (langSelectElem) {
+            langSelectElem.onchange = (e) => {
+                lang = e.target.value;
+                renderHub();
+            };
+        }
 
         // بستن هاب
-        smartHub.querySelector('#orite-hub-close').onclick = () => {
-            smartHub.style.transform = "scale(0.85) translateY(-20px)";
-            smartHub.style.opacity = "0";
-            setTimeout(() => smartHub.remove(), 300);
-        };
+        const closeBtn = smartHub.querySelector('#orite-hub-close');
+        if (closeBtn) {
+            closeBtn.onclick = () => {
+                smartHub.style.transform = "scale(0.85) translateY(-20px)";
+                smartHub.style.opacity = "0";
+                setTimeout(() => smartHub.remove(), 300);
+            };
+        }
 
-        // اعمال افکت فشردن فیزیکی سه‌بعدی روی دکمه‌ها
-        // حذف خطوط اضافی یا توابعی که تعریف نشده‌اند:
-        
-        smartHub.querySelector('#orite-tab-game').onclick = () => {
-            loadExternalScript('orite-hub-game(mini).js');
-        };
+        // اتصال کلیک مینی‌گیم
+        const gameTab = smartHub.querySelector('#orite-tab-game');
+        const gameTabLocal = smartHub.querySelector('#orite-tab-game');
+        if (gameTabLocal) {
+            gameTabLocal.onclick = () => {
+                loadExternalScript('orite-hub-game(mini).js');
+            };
+        }
 
-        smartHub.querySelector('#orite-tab-notes').onclick = () => {
-            loadExternalScript('orite-notes.js');
-        };
+        // 📝 اتصال کلیک یادداشت‌ها دقیقاً مشابه مینی‌گیم
+        const notesTab = smartHub.querySelector('#orite-tab-notes');
+        if (notesTab) {
+            notesTab.onclick = () => {
+                loadExternalScript('orite-hub(notes).js');
+            };
+        }
 
-        smartHub.querySelector('#orite-tab-tools').onclick = () => {
-            loadExternalScript('orite-ai.js');
-        };
+        // 🤖 اتصال کلیک ابزارهای هوش مصنوعی به فایل orite-hub-tools(ai).js
+        const toolsTab = smartHub.querySelector('#orite-tab-tools');
+        if (toolsTab) {
+            toolsTab.onclick = () => {
+                loadExternalScript('orite-hub-tools(ai).js');
+            };
+        }
 
-        // ویرایش بخش کلیک روی تب بازی در فایل orite-hub.js
-        smartHub.querySelector('#orite-tab-game').onclick = () => {
-        loadExternalScript('orite-hub-game(mini).js');
-        };
-
-        smartHub.querySelector('#orite-tab-notes').onclick = () => {
-            loadExternalScript('orite-notes.js');
-        };
-
-        smartHub.querySelector('#orite-tab-tools').onclick = () => {
-            loadExternalScript('orite-ai.js');
-        };
+        HubTabs();
     }
 
     function HubTabs() {
@@ -117,20 +122,33 @@
         });
     }
 
-    // ۴. تابع استاندارد بارگذاری فایل‌های اسکریپت جانبی (مشابه سیستم لود صفحات اچ‌تی‌ام‌ال)
+    // ۴. تابع امن بارگذاری اسکریپت‌های جانبی (جلوگیری از ایجاد تگ تکراری)
     function loadExternalScript(filename) {
-        // بررسی می‌کنیم که آیا قبلاً اسکریپت اضافه شده یا نه، اگر هست رفرش/مجدد لود شود
         let scriptTag = document.getElementById('orite-script-' + filename);
         if (scriptTag) {
-            scriptTag.remove();
+            // اگر اسکریپت قبلاً وجود داشته باشد، نیازی به لود مجدد و تکرار رویداد onload نیست
+            console.log(filename + " is already loaded.");
+            if (filename === 'orite-hub(notes).js' && typeof initNotes === 'function') {
+                initNotes();
+            }
+            return;
         }
         
         const scr = document.createElement('script');
         scr.id = 'orite-script-' + filename;
         scr.src = filename;
         scr.type = 'text/javascript';
-        scr.onload = () => console.log(filename + " loaded successfully.");
-        scr.onerror = () => alert("Module file (" + filename + ") not found! Please create this JS file in your local directory.");
+        
+        scr.onload = () => {
+            console.log(filename + " loaded successfully.");
+            if (filename === 'orite-hub(notes).js' && typeof initNotes === 'function') {
+                initNotes();
+            } else if (filename === 'orite-hub-tools(ai).js' && typeof initAITools === 'function') {
+                initAITools();
+            }
+        };
+        
+        scr.onerror = () => alert("Module file (" + filename + ") not found! Please make sure the file exists in your directory.");
         
         document.body.appendChild(scr);
     }
