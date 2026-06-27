@@ -1,382 +1,522 @@
-(function() {
-    // ایجاد تگ استایل برای CSS
-    const style = document.createElement('style');
-    style.textContent = `
-@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700&family=Inter:wght@300;400;500;700&display=swap');
-*{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#ffffff;--bg2:#f5f5f7;--bg3:#eaeaec;--card:#ffffff;--border:#e0e0e4;--text:#1a1a2e;--text2:#6b6b80;--text3:#9b9baa;--accent:#6c63ff;--accent2:#a78bfa;--accent3:#c4b5fd;--glow:rgba(108,99,255,0.15);--shadow:0 4px 24px rgba(108,99,255,0.1)}
-[data-dark="1"]{--bg:#0f0f1a;--bg2:#1a1a2e;--bg3:#252540;--card:#1e1e35;--border:#2d2d50;--text:#e8e8ff;--text2:#9b9bcc;--text3:#6b6b90;--glow:rgba(167,139,250,0.2);--shadow:0 4px 24px rgba(0,0,0,0.4)}
-body{font-family:'Inter','Vazirmatn',sans-serif;background:transparent}
-#root{min-height:100vh;background:var(--bg);position:relative;overflow:hidden;transition:background .4s}
-#cloud-canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
-#panel{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:16px;animation:panelIn .8s cubic-bezier(.4,0,.2,1) both}
-@keyframes panelIn{from{opacity:0;transform:scale(.95) translateY(20px)}to{opacity:1;transform:none}}
-.glass{background:rgba(255,255,255,0.88);backdrop-filter:blur(20px);border:1px solid rgba(108,99,255,0.15);border-radius:20px;box-shadow:var(--shadow)}
-[data-dark="1"] .glass{background:rgba(15,15,26,0.9)}
-.header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:10px}
-.logo{font-size:18px;font-weight:700;background:linear-gradient(135deg,#6c63ff,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.header-right{display:flex;gap:8px;align-items:center}
-.btn-icon{width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:var(--bg2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:.2s;color:var(--text)}
-.btn-icon:hover{background:var(--glow);border-color:var(--accent)}
-.lang-btn{padding:6px 12px;border-radius:10px;border:1px solid var(--border);background:var(--bg2);cursor:pointer;font-size:12px;color:var(--text2);transition:.2s}
-.lang-btn:hover{border-color:var(--accent);color:var(--accent)}
-.info-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;padding:12px 20px;border-bottom:1px solid var(--border)}
-.info-card{background:var(--bg2);border-radius:12px;padding:10px 14px;border:1px solid var(--border);transition:.2s}
-.info-card:hover{border-color:var(--accent3);transform:translateY(-1px)}
-.info-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
-.info-val{font-size:12px;font-weight:600;color:var(--text);font-family:'Inter',monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.main{display:grid;grid-template-columns:1fr 340px;gap:12px;padding:12px 20px}
-.tools-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.tool-card{background:var(--bg2);border-radius:16px;border:1px solid var(--border);padding:16px;cursor:pointer;transition:.25s;position:relative;overflow:hidden}
-.tool-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));opacity:0;transition:.25s}
-.tool-card:hover{border-color:var(--accent3);transform:translateY(-3px);box-shadow:0 8px 30px var(--glow)}
-.tool-card:hover::before,.tool-card.active::before{opacity:1}
-.tool-card.active{border-color:var(--accent);background:linear-gradient(135deg,rgba(108,99,255,.08),rgba(167,139,250,.05))}
-.tool-icon{font-size:26px;margin-bottom:8px}
-.tool-name{font-size:13px;font-weight:600;color:var(--text)}
-.tool-desc{font-size:11px;color:var(--text3);margin-top:3px}
-.ai-panel{background:var(--bg2);border-radius:16px;border:1px solid var(--border);display:flex;flex-direction:column;height:500px}
-.ai-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
-.ai-dot{width:8px;height:8px;border-radius:50%;background:#22c55e;animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(1.3)}}
-.ai-title{font-size:13px;font-weight:600;color:var(--text)}
-.ai-status{margin-right:auto;font-size:10px;color:#22c55e;font-weight:500}
-.ai-messages{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
-.msg{max-width:88%;padding:10px 14px;border-radius:14px;font-size:12px;line-height:1.7;animation:msgIn .3s ease}
-@keyframes msgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-.msg.ai{background:linear-gradient(135deg,#6c63ff,#a78bfa);color:#fff;align-self:flex-start;border-bottom-left-radius:4px;white-space:pre-wrap;word-break:break-word}
-.msg.user{background:var(--bg3);color:var(--text);align-self:flex-end;border-bottom-right-radius:4px}
-.msg.err{background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid rgba(239,68,68,0.2);align-self:flex-start}
-.ai-input-area{padding:10px;border-top:1px solid var(--border);display:flex;gap:6px}
-.ai-input{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:8px 12px;font-size:12px;color:var(--text);outline:none;transition:.2s;font-family:'Inter','Vazirmatn',sans-serif}
-.ai-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--glow)}
-.ai-send{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#6c63ff,#a78bfa);border:none;cursor:pointer;color:#fff;font-size:15px;display:flex;align-items:center;justify-content:center;transition:.2s;flex-shrink:0}
-.ai-send:hover{transform:scale(1.05)}
-.ai-send:disabled{opacity:.5;cursor:not-allowed;transform:none}
-.tool-workspace{background:var(--bg2);border-radius:16px;border:1px solid var(--border);padding:16px;min-height:180px;margin-top:10px}
-.ws-title{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:10px;display:flex;align-items:center;gap:6px}
-.ws-textarea{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px;font-size:12px;color:var(--text);font-family:'Inter','Vazirmatn',sans-serif;resize:vertical;min-height:80px;outline:none}
-.ws-textarea:focus{border-color:var(--accent)}
-.ws-btn{padding:7px 16px;border-radius:9px;background:linear-gradient(135deg,#6c63ff,#a78bfa);border:none;color:#fff;font-size:12px;font-weight:500;cursor:pointer;transition:.2s;margin-top:8px}
-.ws-btn:hover{opacity:.85;transform:translateY(-1px)}
-.ws-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
-.ws-result{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px;font-size:12px;color:var(--text);margin-top:8px;min-height:50px;line-height:1.7;white-space:pre-wrap;word-break:break-word;display:none}
-.weather-badge{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;background:var(--bg3);border:1px solid var(--border);font-size:11px;color:var(--text2)}
-.footer{text-align:center;padding:10px;font-size:11px;color:var(--text3);border-top:1px solid var(--border)}
-.lang-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:999;align-items:center;justify-content:center}
-.lang-modal.show{display:flex}
-.lang-box{background:var(--card);border-radius:20px;padding:20px;width:340px;max-height:80vh;overflow-y:auto;border:1px solid var(--border)}
-.lang-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
-.lang-item{padding:8px 12px;border-radius:10px;border:1px solid var(--border);cursor:pointer;font-size:12px;color:var(--text);text-align:center;transition:.2s}
-.lang-item:hover,.lang-item.sel{background:var(--glow);border-color:var(--accent);color:var(--accent)}
-.typing{display:flex;gap:4px;padding:10px 14px;background:linear-gradient(135deg,#6c63ff,#a78bfa);border-radius:14px;border-bottom-left-radius:4px;width:fit-content;align-self:flex-start}
-.typing span{width:6px;height:6px;border-radius:50%;background:#fff;animation:bounce 1.2s infinite}
-.typing span:nth-child(2){animation-delay:.2s}.typing span:nth-child(3){animation-delay:.4s}
-@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
-@media(max-width:700px){.main{grid-template-columns:1fr}.tools-grid{grid-template-columns:1fr 1fr}}
+// ایجاد و اعمال تگ استایل (CSS) به سند
+const styleSheet = document.createElement("style");
+styleSheet.type = "text/css";
+styleSheet.innerText = `
+  @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#ffffff;--bg2:#f5f6fa;--bg3:#eef0f8;
+    --card:#ffffff;--card2:#f8f9ff;
+    --text:#1a1a2e;--text2:#4a4a6a;--text3:#8888aa;
+    --accent:#5b6af0;--accent2:#7c3aed;--accent3:#06b6d4;
+    --border:rgba(91,106,240,0.15);--border2:rgba(91,106,240,0.3);
+    --shadow:0 4px 24px rgba(91,106,240,0.10);
+    --shadow2:0 8px 40px rgba(91,106,240,0.18);
+    --glow:0 0 0 3px rgba(91,106,240,0.18);
+    --radius:16px;--radius2:24px;
+    --trans:all 0.35s cubic-bezier(0.4,0,0.2,1);
+    --font-main:'Inter',sans-serif;
+    --font-rtl:'Vazirmatn',sans-serif;
+  }
+  body.dark{
+    --bg:#0d0f1e;--bg2:#131526;--bg3:#1a1d35;
+    --card:#161929;--card2:#1e2240;
+    --text:#e8eaf6;--text2:#9fa8c4;--text3:#6b7499;
+    --border:rgba(91,106,240,0.2);--border2:rgba(91,106,240,0.4);
+    --shadow:0 4px 24px rgba(0,0,0,0.4);
+    --shadow2:0 8px 40px rgba(0,0,0,0.6);
+  }
+  body{
+    font-family:var(--font-main);
+    background:transparent;
+    color:var(--text);
+    min-height:600px;
+    padding:0;
+    overflow-x:hidden;
+  }
+  #panel{
+    background:var(--bg);
+    border-radius:var(--radius2);
+    border:1px solid var(--border2);
+    box-shadow:var(--shadow2);
+    overflow:hidden;
+    position:relative;
+    min-height:600px;
+    animation:panelIn 0.7s cubic-bezier(0.4,0,0.2,1);
+  }
+  @keyframes panelIn{
+    from{opacity:0;transform:scale(0.96) translateY(12px)}
+    to{opacity:1;transform:scale(1) translateY(0)}
+  }
+  #cloud-canvas{
+    position:absolute;top:0;left:0;width:100%;height:180px;
+    pointer-events:none;z-index:0;
+    border-radius:var(--radius2) var(--radius2) 0 0;
+    overflow:hidden;
+  }
+  #topbar{
+    position:relative;z-index:2;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:18px 24px 0;
+    flex-wrap:wrap;gap:10px;
+  }
+  .logo{
+    display:flex;align-items:center;gap:10px;
+    font-size:17px;font-weight:700;
+    color:var(--accent);letter-spacing:-0.3px;
+  }
+  .logo-dot{
+    width:10px;height:10px;border-radius:50%;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    animation:pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse{
+    0%,100%{box-shadow:0 0 0 0 rgba(91,106,240,0.5)}
+    50%{box-shadow:0 0 0 6px rgba(91,106,240,0)}
+  }
+  .topbar-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  select#langSelect{
+    background:var(--card2);border:1px solid var(--border2);
+    border-radius:10px;padding:6px 10px;
+    font-size:13px;color:var(--text);cursor:pointer;
+    outline:none;transition:var(--trans);
+  }
+  select#langSelect:hover{border-color:var(--accent);}
+  .btn-icon{
+    width:36px;height:36px;border-radius:10px;
+    background:var(--card2);border:1px solid var(--border);
+    color:var(--text2);cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    font-size:16px;transition:var(--trans);
+  }
+  .btn-icon:hover{background:var(--accent);color:#fff;border-color:var(--accent);}
+  #info-bar{
+    position:relative;z-index:2;
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+    gap:10px;padding:16px 24px;
+  }
+  .info-card{
+    background:var(--card2);border:1px solid var(--border);
+    border-radius:12px;padding:10px 14px;
+    display:flex;flex-direction:column;gap:2px;
+    transition:var(--trans);
+  }
+  .info-card:hover{border-color:var(--accent);transform:translateY(-1px);box-shadow:var(--shadow);}
+  .info-label{font-size:10px;color:var(--text3);font-weight:500;text-transform:uppercase;letter-spacing:0.5px;}
+  .info-value{font-size:13px;font-weight:600;color:var(--text);font-family:'Inter',monospace;}
+  #tools-row{
+    display:flex;gap:8px;padding:0 24px 12px;
+    overflow-x:auto;flex-wrap:wrap;
+  }
+  .tool-btn{
+    display:flex;align-items:center;gap:7px;
+    padding:8px 16px;border-radius:10px;
+    background:var(--card2);border:1px solid var(--border);
+    color:var(--text2);font-size:13px;font-weight:500;
+    cursor:pointer;transition:var(--trans);white-space:nowrap;
+    font-family:inherit;
+  }
+  .tool-btn:hover,.tool-btn.active{
+    background:var(--accent);color:#fff;
+    border-color:var(--accent);
+    box-shadow:0 2px 12px rgba(91,106,240,0.3);
+    transform:translateY(-1px);
+  }
+  .tool-icon{font-size:15px;}
+  #main-area{
+    display:grid;grid-template-columns:1fr 340px;
+    gap:16px;padding:0 24px 16px;
+    align-items:start;
+  }
+  @media(max-width:680px){#main-area{grid-template-columns:1fr;}}
+  #tool-panel{
+    background:var(--card2);border:1px solid var(--border);
+    border-radius:var(--radius);padding:20px;
+    min-height:260px;transition:var(--trans);
+  }
+  .tool-title{
+    font-size:15px;font-weight:600;color:var(--text);
+    margin-bottom:14px;display:flex;align-items:center;gap:8px;
+  }
+  textarea.tool-input{
+    width:100%;border-radius:10px;
+    background:var(--bg);border:1px solid var(--border2);
+    color:var(--text);padding:10px 14px;
+    font-size:13px;font-family:inherit;
+    resize:vertical;min-height:80px;outline:none;
+    transition:var(--trans);
+  }
+  textarea.tool-input:focus{border-color:var(--accent);box-shadow:var(--glow);}
+  .tool-run{
+    margin-top:10px;padding:9px 20px;
+    background:var(--accent);color:#fff;border:none;
+    border-radius:10px;font-size:13px;font-weight:600;
+    cursor:pointer;transition:var(--trans);font-family:inherit;
+  }
+  .tool-run:hover{background:var(--accent2);transform:translateY(-1px);}
+  .tool-result{
+    margin-top:12px;padding:12px;
+    background:var(--bg);border:1px solid var(--border);
+    border-radius:10px;font-size:13px;color:var(--text2);
+    min-height:40px;line-height:1.6;
+    white-space:pre-wrap;word-break:break-word;
+    max-height:200px;overflow-y:auto;
+  }
+  #ai-window{
+    background:var(--card);border:1px solid var(--border2);
+    border-radius:var(--radius);overflow:hidden;
+    display:flex;flex-direction:column;
+    box-shadow:var(--shadow);
+    max-height:420px;
+  }
+  #ai-header{
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    padding:14px 18px;display:flex;align-items:center;gap:10px;
+  }
+  .ai-avatar{
+    width:34px;height:34px;border-radius:50%;
+    background:rgba(255,255,255,0.2);
+    display:flex;align-items:center;justify-content:center;
+    font-size:17px;
+  }
+  .ai-name{color:#fff;font-weight:600;font-size:14px;}
+  .ai-status{font-size:11px;color:rgba(255,255,255,0.7);}
+  .ai-indicator{
+    width:8px;height:8px;border-radius:50%;background:#4ade80;
+    margin-left:auto;animation:blink 1.5s ease-in-out infinite;
+  }
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+  #ai-messages{
+    flex:1;overflow-y:auto;padding:14px;
+    display:flex;flex-direction:column;gap:10px;
+    max-height:240px;
+  }
+  .msg{
+    max-width:85%;padding:9px 13px;border-radius:12px;
+    font-size:13px;line-height:1.5;
+  }
+  .msg.bot{
+    background:var(--bg3);color:var(--text);
+    align-self:flex-start;border-bottom-left-radius:4px;
+  }
+  .msg.user{
+    background:var(--accent);color:#fff;
+    align-self:flex-end;border-bottom-right-radius:4px;
+    text-align:right;
+  }
+  #ai-input-row{
+    display:flex;gap:8px;padding:12px;
+    border-top:1px solid var(--border);
+  }
+  #ai-input{
+    flex:1;background:var(--bg2);border:1px solid var(--border2);
+    border-radius:10px;padding:8px 12px;
+    font-size:13px;color:var(--text);outline:none;
+    transition:var(--trans);font-family:inherit;
+  }
+  #ai-input:focus{border-color:var(--accent);box-shadow:var(--glow);}
+  #ai-send{
+    width:36px;height:36px;border-radius:10px;
+    background:var(--accent);color:#fff;border:none;
+    cursor:pointer;font-size:16px;transition:var(--trans);
+  }
+  #ai-send:hover{background:var(--accent2);transform:scale(1.05);}
+  .typing-dots{display:inline-flex;gap:3px;align-items:center;padding:2px 0;}
+  .typing-dots span{
+    width:5px;height:5px;border-radius:50%;background:var(--accent);
+    animation:dot 1.2s ease-in-out infinite;
+  }
+  .typing-dots span:nth-child(2){animation-delay:0.2s}
+  .typing-dots span:nth-child(3){animation-delay:0.4s}
+  @keyframes dot{0%,80%,100%{transform:scale(0.6);opacity:0.4}40%{transform:scale(1);opacity:1}}
+  #footer{
+    padding:12px 24px;border-top:1px solid var(--border);
+    display:flex;align-items:center;justify-content:space-between;
+    font-size:11px;color:var(--text3);flex-wrap:wrap;gap:6px;
+  }
+  .footer-logo{
+    font-weight:700;font-size:12px;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+    background-clip:text;
+  }
+  #datetime-bar{
+    display:flex;align-items:center;gap:16px;
+    padding:0 24px 12px;flex-wrap:wrap;
+  }
+  .dt-item{
+    display:flex;align-items:center;gap:6px;
+    font-size:13px;color:var(--text2);
+    background:var(--card2);border:1px solid var(--border);
+    border-radius:8px;padding:5px 12px;
+  }
+  .weather-badge{
+    display:flex;align-items:center;gap:6px;
+    padding:5px 12px;border-radius:8px;
+    background:var(--card2);border:1px solid var(--border);
+    font-size:13px;color:var(--text2);
+    font-weight:500;
+    cursor:default;transition:var(--trans);
+  }
+  .weather-icon{font-size:18px;}
+  .rtl{direction:rtl;text-align:right;font-family:var(--font-rtl)!important;}
+  .rtl .tool-btn,.rtl .info-label,.rtl .info-value{font-family:var(--font-rtl)!important;}
+  select{appearance:none;}
+  ::-webkit-scrollbar{width:5px;height:5px}
+  ::-webkit-scrollbar-track{background:transparent}
+  ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:10px}
+  #loading-overlay{
+    position:absolute;inset:0;background:var(--bg);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    z-index:100;border-radius:var(--radius2);
+    transition:opacity 0.5s ease;
+  }
+  .loader-ring{
+    width:48px;height:48px;border-radius:50%;
+    border:3px solid var(--border2);
+    border-top-color:var(--accent);
+    animation:spin 0.8s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg)}}
+  #lang-overlay{display:none;}
 `;
-    document.head.appendChild(style);
+document.head.appendChild(styleSheet);
 
-    // ساخت بدنه HTML
-    const canvas = document.createElement('canvas');
-    canvas.id = 'cloud-canvas';
+// ایجاد ساختار HTML پنل به صورت المان‌های جاوا اسکریپت
+const panel = document.createElement("div");
+panel.id = "panel";
+panel.innerHTML = `
+  <div id="loading-overlay">
+    <div class="loader-ring"></div>
+    <div style="margin-top:14px;font-size:13px;color:var(--text3);" id="loadText">در حال بارگذاری...</div>
+  </div>
 
-    const rootDiv = document.createElement('div');
-    rootDiv.id = 'root';
+  <canvas id="cloud-canvas"></canvas>
 
-    const panel = document.createElement('div');
-    panel.id = 'panel';
+  <div id="topbar">
+    <div class="logo">
+      <div class="logo-dot"></div>
+      <span id="logoText">LuoLaf Studio</span>
+    </div>
+    <div class="topbar-right">
+      <div class="weather-badge" id="weatherBadge">
+        <span class="weather-icon" id="weatherIcon">☁️</span>
+        <span id="weatherText">-</span>
+      </div>
+      <select id="langSelect" onchange="setLang(this.value)">
+        <option value="fa">🇮🇷 فارسی</option>
+        <option value="en">🇺🇸 English</option>
+        <option value="tr">🇹🇷 Türkçe</option>
+        <option value="ar">🇸🇦 العربية</option>
+        <option value="ku">🏴 کوردی</option>
+        <option value="zh">🇨🇳 中文</option>
+        <option value="ko">🇰🇷 한국어</option>
+        <option value="fr">🇫🇷 Français</option>
+        <option value="es">🇪🇸 Español</option>
+        <option value="de">🇩🇪 Deutsch</option>
+        <option value="it">🇮🇹 Italiano</option>
+        <option value="he">🇮🇱 עברית</option>
+        <option value="ru">🇷🇺 Русский</option>
+        <option value="ja">🇯🇵 日本語</option>
+        <option value="tg">🇹🇯 Тоҷикӣ</option>
+        <option value="hy">🇦🇲 Հայերեն</option>
+        <option value="hr">🇭🇷 Hrvatski</option>
+        <option value="ms">🇲🇾 Melayu</option>
+        <option value="hi">🇮🇳 हिन्दी</option>
+      </select>
+      <div class="btn-icon" onclick="toggleDark()" title="Dark Mode">🌙</div>
+    </div>
+  </div>
 
-    const glass = document.createElement('div');
-    glass.className = 'glass';
+  <div id="datetime-bar">
+    <div class="dt-item">🕐 <span id="clockEl">--:--:--</span></div>
+    <div class="dt-item">📅 <span id="dateEl">---</span></div>
+    <div class="dt-item">🌍 <span id="tzEl">---</span></div>
+  </div>
 
-    const header = document.createElement('div');
-    header.className = 'header';
-    header.innerHTML = `
-  <span class="logo">✦ LuoLaf Studio</span>
-  <div class="header-right">
-    <div class="weather-badge">⛅ <span id="weather-txt">...</span></div>
-    <button class="btn-icon" onclick="toggleDark()" id="dark-btn">🌙</button>
-    <button class="lang-btn" onclick="document.querySelector('.lang-modal').classList.add('show')">🌐 <span id="lang-label">فارسی</span></button>
+  <div id="info-bar">
+    <div class="info-card">
+      <div class="info-label" id="l-ip">آدرس IP</div>
+      <div class="info-value" id="userIP">در حال دریافت...</div>
+    </div>
+    <div class="info-card">
+      <div class="info-label" id="l-speed">سرعت اینترنت</div>
+      <div class="info-value" id="netSpeed">در حال تست...</div>
+    </div>
+    <div class="info-card">
+      <div class="info-label" id="l-uid">شناسه کاربر</div>
+      <div class="info-value" id="userId" style="font-size:11px">---</div>
+    </div>
+    <div class="info-card">
+      <div class="info-label" id="l-browser">مرورگر</div>
+      <div class="info-value" id="browserInfo" style="font-size:11px">---</div>
+    </div>
+    <div class="info-card">
+      <div class="info-label" id="l-os">سیستم عامل</div>
+      <div class="info-value" id="osInfo" style="font-size:11px">---</div>
+    </div>
+    <div class="info-card">
+      <div class="info-label" id="l-screen">صفحه نمایش</div>
+      <div class="info-value" id="screenInfo">---</div>
+    </div>
+  </div>
+
+  <div id="tools-row">
+    <button class="tool-btn active" onclick="showTool('translate')" id="btn-translate">
+      <span class="tool-icon">🌐</span><span id="tl-translate">ترجمه‌گر</span>
+    </button>
+    <button class="tool-btn" onclick="showTool('code')" id="btn-code">
+      <span class="tool-icon">💻</span><span id="tl-code">کد نویس</span>
+    </button>
+    <button class="tool-btn" onclick="showTool('law')" id="btn-law">
+      <span class="tool-icon">⚖️</span><span id="tl-law">حقوق‌دان</span>
+    </button>
+    <button class="tool-btn" onclick="showTool('chat')" id="btn-chat">
+      <span class="tool-icon">💬</span><span id="tl-chat">دستیار</span>
+    </button>
+    <button class="tool-btn" onclick="showTool('geo')" id="btn-geo">
+      <span class="tool-icon">🗺️</span><span id="tl-geo">جغرافیا</span>
+    </button>
+  </div>
+
+  <div id="main-area">
+    <div id="tool-panel">
+      <div class="tool-title">
+        <span id="tool-icon-main">🌐</span>
+        <span id="tool-name-main">ترجمه‌گر هوشمند</span>
+      </div>
+      <select id="tool-lang-sel" style="background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:6px 10px;font-size:13px;color:var(--text);margin-bottom:10px;outline:none;width:100%;display:none">
+        <option value="Persian">فارسی</option><option value="English">انگلیسی</option>
+        <option value="Turkish">ترکی</option><option value="Arabic">عربی</option>
+        <option value="French">فرانسوی</option><option value="Spanish">اسپانیایی</option>
+        <option value="German">آلمانی</option><option value="Chinese">چینی</option>
+        <option value="Japanese">ژاپنی</option><option value="Russian">روسی</option>
+      </select>
+      <textarea class="tool-input" id="toolInput" placeholder="متن یا سوال خود را اینجا بنویسید..." rows="4"></textarea>
+      <button class="tool-run" onclick="runTool()" id="runBtn">اجرا ▶</button>
+      <div class="tool-result" id="toolResult" style="display:none"></div>
+    </div>
+
+    <div id="ai-window">
+      <div id="ai-header">
+        <div class="ai-avatar">🤖</div>
+        <div>
+          <div class="ai-name" id="ai-name-txt">دستیار هوش مصنوعی</div>
+          <div class="ai-status" id="ai-status-txt">آنلاین</div>
+        </div>
+        <div class="ai-indicator"></div>
+      </div>
+      <div id="ai-messages">
+        <div class="msg bot" id="ai-welcome">سلام! من دستیار هوشمند LuoLaf Studio هستم. چطور می‌توانم کمکتان کنم؟ 😊</div>
+      </div>
+      <div id="ai-input-row">
+        <input type="text" id="ai-input" placeholder="پیام بنویسید..." onkeydown="if(event.key==='Enter')sendAI()">
+        <button id="ai-send" onclick="sendAI()">➤</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="footer">
+    <div style="color:var(--text3);font-size:11px;" id="footerLeft">پنل هوشمند — نسخه ۱.۰</div>
+    <div class="footer-logo">مدیر پروژه: LuoLaf.Studio</div>
+    <div style="color:var(--text3);font-size:11px;" id="footerRight">© 2025</div>
   </div>
 `;
 
-    const infoBar = document.createElement('div');
-    infoBar.className = 'info-bar';
-    infoBar.innerHTML = `
-  <div class="info-card"><div class="info-label" data-i18n="time">زمان</div><div class="info-val" id="clock">--:--:--</div></div>
-  <div class="info-card"><div class="info-label" data-i18n="date">تاریخ</div><div class="info-val" id="date-val">---</div></div>
-  <div class="info-card"><div class="info-label" data-i18n="ip">آدرس IP</div><div class="info-val" id="ip-val">بارگذاری...</div></div>
-  <div class="info-card"><div class="info-label" data-i18n="speed">سرعت</div><div class="info-val" id="speed-val">اندازه‌گیری...</div></div>
-  <div class="info-card"><div class="info-label" data-i18n="user_id">شناسه کاربر</div><div class="info-val" id="uid-val">---</div></div>
-  <div class="info-card"><div class="info-label" data-i18n="os">سیستم</div><div class="info-val" id="os-val">---</div></div>
-  <div class="info-card"><div class="info-label" data-i18n="browser">مرورگر</div><div class="info-val" id="browser-val">---</div></div>
-`;
+// الحاق پنل به بدنه صفحه
+document.body.appendChild(panel);
 
-    const main = document.createElement('div');
-    main.className = 'main';
+// انتقال و اجرای منطق جاوا اسکریپت
+const T = {
+  fa:{dir:'rtl',font:'Vazirmatn',ip:'آدرس IP',speed:'سرعت اینترنت',uid:'شناسه کاربر',browser:'مرورگر',os:'سیستم عامل',screen:'صفحه نمایش',translate:'ترجمه‌گر',code:'کد نویس',law:'حقوق‌دان',chat:'دستیار',geo:'جغرافیا',runBtn:'اجرا ▶',toolTitle:{'translate':'ترجمه‌گر هوشمند','code':'کد نویس قوی','law':'حقوق‌دان هوشمند','chat':'دستیار چت‌بات','geo':'جغرافی‌دان هوشمند'},placeholder:{'translate':'متن مورد نظر برای ترجمه...','code':'کد یا مشکل برنامه‌نویسی...','law':'سوال حقوقی خود را بنویسید...','chat':'سوال خود را بنویسید...','geo':'سوال جغرافیایی...'},aiName:'دستیار هوش مصنوعی',aiStatus:'آنلاین',aiPlaceholder:'پیام بنویسید...',aiWelcome:'سلام! من دستیار هوشمند LuoLaf Studio هستم. چطور می‌توانم کمکتان کنم؟ 😊',footerLeft:'پنل هوشمند — نسخه ۱.۰',load:'در حال بارگذاری...'},
+  en:{dir:'ltr',font:'Inter',ip:'IP Address',speed:'Internet Speed',uid:'User ID',browser:'Browser',os:'OS',screen:'Screen',translate:'Translator',code:'Coder',law:'Legal',chat:'Assistant',geo:'Geography',runBtn:'Run ▶',toolTitle:{'translate':'AI Translator','code':'Smart Coder','law':'Legal Advisor','chat':'Chatbot','geo':'Geographer'},placeholder:{'translate':'Enter text to translate...','code':'Enter code or problem...','law':'Write your legal question...','chat':'Ask anything...','geo':'Ask a geography question...'},aiName:'AI Assistant',aiStatus:'Online',aiPlaceholder:'Type a message...',aiWelcome:'Hello! I am the LuoLaf Studio AI Assistant. How can I help you? 😊',footerLeft:'Smart Panel — v1.0',load:'Loading...'},
+  tr:{dir:'ltr',font:'Inter',ip:'IP Adresi',speed:'İnternet Hızı',uid:'Kullanıcı ID',browser:'Tarayıcı',os:'İşletim Sistemi',screen:'Ekran',translate:'Çevirmen',code:'Kodlayıcı',law:'Hukuk',chat:'Asistan',geo:'Coğrafya',runBtn:'Çalıştır ▶',toolTitle:{'translate':'AI Çevirmen','code':'Akıllı Kodlayıcı','law':'Hukuk Danışmanı','chat':'Sohbet Botu','geo':'Coğrafyacı'},placeholder:{'translate':'Çevrilecek metni girin...','code':'Kod veya problemi girin...','law':'Hukuki sorunuzu yazın...','chat':'Bir şey sorun...','geo':'Coğrafya sorusu sorun...'},aiName:'AI Asistanı',aiStatus:'Çevrimiçi',aiPlaceholder:'Mesaj yazın...',aiWelcome:'Merhaba! Ben LuoLaf Studio AI Asistanıyım. Size nasıl yardımcı olabilirim? 😊',footerLeft:'Akıllı Panel — v1.0',load:'Yükleniyor...'},
+  ar:{dir:'rtl',font:'Vazirmatn',ip:'عنوان IP',speed:'سرعة الإنترنت',uid:'معرف المستخدم',browser:'المتصفح',os:'نظام التشغيل',screen:'الشاشة',translate:'مترجم',code:'مبرمج',law:'محامي',chat:'مساعد',geo:'جغرافيا',runBtn:'تشغيل ▶',toolTitle:{'translate':'مترجم ذكي','code':'مبرمج ذكي','law':'مستشار قانوني','chat':'روبوت محادثة','geo':'جغرافي ذكي'},placeholder:{'translate':'أدخل النص للترجمة...','code':'أدخل الكود أو المشكلة...','law':'اكتب سؤالك القانوني...','chat':'اسأل أي شيء...','geo':'اسأل سؤالاً جغرافياً...'},aiName:'المساعد الذكي',aiStatus:'متصل',aiPlaceholder:'اكتب رسالة...',aiWelcome:'مرحباً! أنا مساعد LuoLaf Studio الذكي. كيف يمكنني مساعدتك؟ 😊',footerLeft:'لوحة ذكية — الإصدار ١.٠',load:'جار التحميل...'},
+  ku:{dir:'rtl',font:'Vazirmatn',ip:'ناونیشانی IP',speed:'خێرایی ئینتەرنێت',uid:'ناسنامەی بەکارهێنەر',browser:'وێبگەڕ',os:'سیستەمی کارپێکردن',screen:'شاشە',translate:'وەرگێڕ',code:'کۆدنووس',law:'یاسادان',chat:'یاریدەدەر',geo:'جوگرافیا',runBtn:'جێبەجێبکە ▶',toolTitle:{'translate':'وەرگێڕی زیرەک','code':'کۆدنووسی بەهێز','law':'ڕاوێژکاری یاسایی','chat':'بۆتی گفتوگۆ','geo':'جوگرافیادان'},placeholder:{'translate':'دەقی وەرگێڕانەکەت بنووسە...','code':'کۆد یان کێشە بنووسە...','law':'پرسیاری یاسایییەکەت بنووسە...','chat':'هەرشتێک بپرسە...','geo':'پرسیاری جوگرافیایی بپرسە...'},aiName:'یاریدەرە زیرەکەکە',aiStatus:'ئەینلاین',aiPlaceholder:'نامە بنووسە...',aiWelcome:'سڵاو! من یاریدەرە زیرەکی LuoLaf Studio ی. چۆن دەتوانم یارمەتیت بدەم؟ 😊',footerLeft:'پانێلی زیرەک — وەشان ١.٠',load:'بارکردن...'},
+  zh:{dir:'ltr',font:'Inter',ip:'IP地址',speed:'网速',uid:'用户ID',browser:'浏览器',os:'操作系统',screen:'屏幕',translate:'翻译',code:'编程',law:'法律',chat:'助手',geo:'地理',runBtn:'运行 ▶',toolTitle:{'translate':'AI翻译器','code':'智能编程助手','law':'法律顾问','chat':'聊天机器人','geo':'地理学家'},placeholder:{'translate':'输入要翻译的文本...','code':'输入代码或问题...','law':'下您的法律问题...','chat':'问任何问题...','geo':'问一个地理问题...'},aiName:'AI助手',aiStatus:'在线',aiPlaceholder:'输入消息...',aiWelcome:'你好！我是LuoLaf Studio AI助手。有什么可以帮您？😊',footerLeft:'智能面板 — v1.0',load:'加载中...'},
+  ko:{dir:'ltr',font:'Inter',ip:'IP 주소',speed:'인터넷 속도',uid:'사용자 ID',browser:'브라우저',os:'운영 체제',screen:'화면',translate:'번역기',code:'코딩',law:'법률',chat:'어시스턴트',geo:'지리',runBtn:'실행 ▶',toolTitle:{'translate':'AI 번역기','code':'스마트 코더','law':'법률 상담','chat':'챗봇','geo':'지리학자'},placeholder:{'translate':'번역할 텍스트 입력...','code':'코드 또는 문제 입력...','law':'법률 질문을 입력하세요...','chat':'무엇이든 물어보세요...','geo':'지리 질문을 입력하세요...'},aiName:'AI 어시스턴트',aiStatus:'온라인',aiPlaceholder:'메시지 입력...',aiWelcome:'안녕하세요! 저는 LuoLaf Studio AI 어시스턴트입니다. 어떻게 도와드릴까요? 😊',footerLeft:'스마트 패널 — v1.0',load:'로딩 중...'},
+  fr:{dir:'ltr',font:'Inter',ip:'Adresse IP',speed:'Vitesse Internet',uid:'ID Utilisateur',browser:'Navigateur',os:'Système d\'exploitation',screen:'Écran',translate:'Traducteur',code:'Codeur',law:'Juridique',chat:'Assistant',geo:'Géographie',runBtn:'Exécuter ▶',toolTitle:{'translate':'Traducteur IA','code':'Codeur Intelligent','law':'Conseiller Juridique','chat':'Chatbot','geo':'Géographe'},placeholder:{'translate':'Entrez le texte à traduire...','code':'Entrez le code ou le problème...','law':'Écrivez votre question juridique...','chat':'Posez n\'importe quelle question...','geo':'Posez une question de géographie...'},aiName:'Assistant IA',aiStatus:'En ligne',aiPlaceholder:'Tapez un message...',aiWelcome:'Bonjour! Je suis l\'assistant IA de LuoLaf Studio. Comment puis-je vous aider? 😊',footerLeft:'Panneau Intelligent — v1.0',load:'Chargement...'},
+  es:{dir:'ltr',font:'Inter',ip:'Dirección IP',speed:'Velocidad Internet',uid:'ID Usuario',browser:'Navegador',os:'Sistema Operativo',screen:'Pantalla',traductor:'Traductor',code:'Programador',law:'Legal',chat:'Asistente',geo:'Geografía',runBtn:'Ejecutar ▶',toolTitle:{'translate':'Traductor IA','code':'Programador Inteligente','law':'Asesor Legal','chat':'Chatbot','geo':'Geógrafo'},placeholder:{'translate':'Ingrese texto para traducir...','code':'Ingrese código o problema...','law':'Escriba su pregunta legal...','chat':'Pregunte cualquier cosa...','geo':'Haga una pregunta geográfica...'},aiName:'Asistente IA',aiStatus:'En línea',aiPlaceholder:'Escriba un mensaje...',aiWelcome:'¡Hola! Soy el asistente IA de LuoLaf Studio. ¿Cómo puedo ayudarle? 😊',footerLeft:'Panel Inteligente — v1.0',load:'Cargando...'},
+  de:{dir:'ltr',font:'Inter',ip:'IP-Adresse',speed:'Internet-Geschwindigkeit',uid:'Benutzer-ID',browser:'Browser',os:'Betriebssystem',screen:'Bildschirm',translate:'Übersetzer',code:'Programmierer',law:'Rechtlich',chat:'Assistent',geo:'Geographie',runBtn:'Ausführen ▶',toolTitle:{'translate':'KI-Übersetzer','code':'Intelligenter Coder','law':'Rechtsberater','chat':'Chatbot','geo':'Geograph'},placeholder:{'translate':'Text zum Übersetzen eingeben...','code':'Code oder Problem eingeben...','law':'Ihre Rechtsfrage eingeben...','chat':'Beliebige Frage stellen...','geo':'Geografische Frage stellen...'},aiName:'KI-Assistent',aiStatus:'Online',aiPlaceholder:'Nachricht eingeben...',aiWelcome:'Hallo! Ich bin der KI-Assistent von LuoLaf Studio. Wie kann ich Ihnen helfen? 😊',footerLeft:'Intelligentes Panel — v1.0',load:'Lädt...'},
+  it:{dir:'ltr',font:'Inter',ip:'Indirizzo IP',speed:'Velocità Internet',uid:'ID Utente',browser:'Browser',os:'Sistema Operativo',screen:'Schermo',translate:'Traduttore',code:'Programmatore',law:'Legale',chat:'Assistente',geo:'Geografia',runBtn:'Esegui ▶',toolTitle:{'translate':'Traduttore IA','code':'Programmatore Intelligente','law':'Consulente Legale','chat':'Chatbot','geo':'Geografo'},placeholder:{'translate':'Inserisci testo da tradurre...','code':'Inserisci codice o problema...','law':'Scrivi la tua domanda legale...','chat':'Chiedi qualsiasi cosa...','geo':'Fai una domanda geografica...'},aiName:'Assistente IA',aiStatus:'Online',aiPlaceholder:'Digita un messaggio...',aiWelcome:'Ciao! Sono l\'assistente IA di LuoLaf Studio. Come posso aiutarti? 😊',footerLeft:'Pannello Intelligente — v1.0',load:'Caricamento...'},
+  he:{dir:'rtl',font:'Vazirmatn',ip:'כתובת IP',speed:'מהירות אינטרנט',uid:'מזהה משתמש',browser:'דפדפן',os:'מערכת הפעלה',screen:'מסך',translate:'מתרגם',code:'מתכנת',law:'משפטי',chat:'עוזר',geo:'גיאוגרפיה',runBtn:'הפעל ▶',toolTitle:{'translate':'מתרגם AI','code':'מתכנת חכם','law':'יועץ משפטי','chat':'צ\'אטבוט','geo':'גיאוגרף'},placeholder:{'translate':'הזן טקסט לתרגום...','code':'הזן קוד או בעיה...','law':'כתוב את שאלתך המשפטית...','chat':'שאל כל דבר...','geo':'שאל שאלה גיאוגרפית...'},aiName:'עוזר AI',aiStatus:'מקוון',aiPlaceholder:'הקלד הודעה...',aiWelcome:'שלום! אני עוזר ה-AI של LuoLaf Studio. איך אוכל לעזור לך? 😊',footerLeft:'פאנל חכם — v1.0',load:'טוען...'},
+  ru:{dir:'ltr',font:'Inter',ip:'IP-адрес',speed:'Скорость интернета',uid:'ID пользователя',browser:'Браузер',os:'ОС',screen:'Экран',translate:'Переводчик',code:'Программист',law:'Юридический',chat:'Ассистент',geo:'География',runBtn:'Запустить ▶',toolTitle:{'translate':'ИИ-переводчик','code':'Умный программист','law':'Юридический советник','chat':'Чат-бот','geo':'Географ'},placeholder:{'translate':'Введите текст для перевода...','code':'Введите код или задачу...','law':'Напишите ваш юридический вопрос...','chat':'Задайте любой вопрос...','geo':'Задайте географический вопрос...'},aiName:'ИИ-ассистент',aiStatus:'В сети',aiPlaceholder:'Введите сообщение...',aiWelcome:'Здравствуйте! Я ИИ-ассистент LuoLaf Studio. Чем могу помочь? 😊',footerLeft:'Умная панель — v1.0',load:'Загрузка...'},
+  ja:{dir:'ltr',font:'Inter',ip:'IPアドレス',speed:'インターネット速度',uid:'ユーザーID',browser:'ブラウザ',os:'OS',screen:'画面',translate:'翻訳者',code:'プログラマー',law:'法律',chat:'アシスタント',geo:'地理',runBtn:'実行 ▶',toolTitle:{'translate':'AI翻訳者','code':'スマートコーダー','law':'法律アドバイザー','chat':'チャットボット','geo':'地理学者'},placeholder:{'translate':'翻訳するテキストを入力...','code':'コードまたは問題を入力...','law':'法律の質問を書いてください...','chat':'何でも聞いてください...','geo':'地理の質問をしてください...'},aiName:'AIアシスタント',aiStatus:'オンライン',aiPlaceholder:'메시지 입력...',aiWelcome:'こんにちは！私はLuoLaf StudioのAIアシスタントです。何かお手伝いできますか？😊',footerLeft:'スマートパネル — v1.0',load:'読み込み中...'},
+  tg:{dir:'ltr',font:'Inter',ip:'Суроғаи IP',speed:'Суръати Интернет',uid:'ID Корбар',browser:'Браузер',os:'Системаи Корбар',screen:'Экран',translate:'Тарҷумон',code:'Барномасоз',law:'Ҳуқуқшинос',chat:'Ёрдамчи',geo:'Ҷуғрофиё',runBtn:'Иҷро ▶',toolTitle:{'translate':'Тарҷумони зиракона','code':'Барномасози ақлӣ','law':'Маслиҳатчии ҳуқуқӣ','chat':'Чатбот','geo':'Ҷуғрофиёшинос'},placeholder:{'translate':'Матни тарҷумаро ворид кунед...','code':'Код ё мушкилотро ворид кунед...','law':'Савол ҳуқуқии худро нависед...','chat':'Ҳар чизеро бипурсед...','geo':'Савол ҷуғрофиявӣ бипурсед...'},aiName:'Ёрдамчии AI',aiStatus:'Онлайн',aiPlaceholder:'Паём нависед...',aiWelcome:'Салом! Ман ёрдамчии AI-и LuoLaf Studio ҳастам. Чӣ тавр метавонам кӯмак кунам? 😊',footerLeft:'Панели зиракона — v1.0',load:'Боргузорӣ...'},
+  hy:{dir:'ltr',font:'Inter',ip:'IP հասցե',speed:'Ինտերնետ արագություն',uid:'Օգտատիրוջ ID',browser:'Դիտարկիչ',os:'Օպ. համակարգ',screen:'Էկրան',translate:'Թարգմանիչ',code:'Ծրագրավոր',law:'Իրավաբան',chat:'Օգնական',geo:'Աշխ. ատ.',runBtn:'Գործարկել ▶',toolTitle:{'translate':'AI Թարգմանիչ','code':'Խելացի ծրագրավոր','law':'Իրավական Խորհրդատու','chat':'Չաթ-Բոտ','geo':'Աշխարհագրագետ'},placeholder:{'translate':'Մուտքագրեք թարգմանելու տեքստ...','code':'Մուտքագրեք կոդ կամ խնդիր...','law':'Գրեք ձեր իրավական հարցը...','chat':'Հարցրեք ցանկացած բան...','geo':'Տվեք աշխ. ատ. հարց...'},aiName:'AI Օգնական',aiStatus:'Առցանց',aiPlaceholder:'Գրեք հաղորդագրություն...',aiWelcome:'Բարև! Ես LuoLaf Studio-ի AI օգնականն եմ: Ինչպե՞ս կարող եմ օգնել: 😊',footerLeft:'Խելացի Panel — v1.0',load:'Բեռնում...'},
+  hr:{dir:'ltr',font:'Inter',ip:'IP Adresa',speed:'Brzina Interneta',uid:'Korisnički ID',browser:'Preglednik',os:'Operativni Sustav',screen:'Zaslon',translate:'Prevoditelj',code:'Programer',law:'Pravni',chat:'Pomoćnik',geo:'Geografija',runBtn:'Pokreni ▶',toolTitle:{'translate':'AI Prevoditelj','code':'Pametni Programer','law':'Pravni Savjetnik','chat':'Chatbot','geo':'Geograf'},placeholder:{'translate':'Unesite tekst za prijevod...','code':'Unesite kod ili problem...','law':'Napišite pravno pitanje...','chat':'Pitajte bilo što...','geo':'Postavite geografsko pitanje...'},aiName:'AI Pomoćnik',aiStatus:'Online',aiPlaceholder:'Upišite poruku...',aiWelcome:'Pozdrav! Ja sam AI pomoćnik LuoLaf Studija. Kako vam mogu pomoći? 😊',footerLeft:'Pametna Ploča — v1.0',load:'Učitavanje...'},
+  ms:{dir:'ltr',font:'Inter',ip:'Alamat IP',speed:'Kelajuan Internet',uid:'ID Pengguna',browser:'Pelayar',os:'Sistem Pengendalian',screen:'Skrin',translate:'Penterjemah',code:'Pengekod',law:'Undang-undang',chat:'Pembantu',geo:'Geografi',runBtn:'Jalankan ▶',toolTitle:{'translate':'Penterjemah AI','code':'Pengekod Pintar','law':'Penasihat Undang-undang','chat':'Chatbot','geo':'Ahli Geografi'},placeholder:{'translate':'Masukkan teks untuk diterjemahkan...','code':'Masukkan kod atau masalah...','law':'Tulis soalan undang-undang anda...','chat':'Tanya apa sahaja...','geo':'Tanya soalan geografi...'},aiName:'Pembantu AI',aiStatus:'Dalam Talian',aiPlaceholder:'Taip mesej...',aiWelcome:'Helo! Saya pembantu AI LuoLaf Studio. Bagaimana saya boleh membantu anda? 😊',footerLeft:'Panel Pintar — v1.0',load:'Memuatkan...'},
+  hi:{dir:'ltr',font:'Inter',ip:'IP पता',speed:'इंटरनेट गति',uid:'उपयोगकर्ता ID',browser:'ब्राउज़र',os:'ऑपरेटिंग सिस्टम',screen:'स्क्रीन',translate:'अनुवादक',code:'कोडर',law:'कानूनी',chat:'सहायक',geo:'भूगोल',runBtn:'चलाएं ▶',toolTitle:{'translate':'AI अनुवादक','code':'स्मार्ट कोडर','law':'कानूनी सलाहकार','chat':'चैटबॉट','geo':'भूगोलवेत्ता'},placeholder:{'translate':'अनुवाद के लिए टेक्स्ट दर्ज करें...','code':'कोड या समस्या दर्ज करें...','law':'अपना कानूनी प्रश्न लिखें...','chat':'कुछ भी पूछें...','geo':'भूगोल प्रश्न पूछें...'},aiName:'AI सहायक',aiStatus:'ऑनलाइन',aiPlaceholder:'संदेश टाइप करें...',aiWelcome:'नमस्ते! मैं LuoLaf Studio का AI सहायक हूं। मैं आपकी कैसे मदद कर सकता हूं? 😊',footerLeft:'स्मार्ट पैनल — v1.0',load:'लोड हो रहा है...'}
+};
 
-    const leftCol = document.createElement('div');
-    leftCol.innerHTML = `
-    <div class="tools-grid" id="tools-grid">
-      <div class="tool-card" onclick="setTool('translate')" id="t-translate"><div class="tool-icon">🌐</div><div class="tool-name" data-i18n="tool_translate">مترجم هوشمند</div><div class="tool-desc" data-i18n="tool_translate_d">ترجمه در ۲۰+ زبان</div></div>
-      <div class="tool-card" onclick="setTool('code')" id="t-code"><div class="tool-icon">💻</div><div class="tool-name" data-i18n="tool_code">کدنویس قوی</div><div class="tool-desc" data-i18n="tool_code_d">تولید و اصلاح کد</div></div>
-      <div class="tool-card" onclick="setTool('legal')" id="t-legal"><div class="tool-icon">⚖️</div><div class="tool-name" data-i18n="tool_legal">مشاور حقوقی</div><div class="tool-desc" data-i18n="tool_legal_d">راهنمایی قانونی</div></div>
-      <div class="tool-card" onclick="setTool('chat')" id="t-chat"><div class="tool-icon">🤖</div><div class="tool-name" data-i18n="tool_chat">دستیار هوشمند</div><div class="tool-desc" data-i18n="tool_chat_d">چت‌بات کمکی</div></div>
-      <div class="tool-card" onclick="setTool('geo')" id="t-geo" style="grid-column:span 2"><div class="tool-icon">🌍</div><div class="tool-name" data-i18n="tool_geo">جغرافیادان</div><div class="tool-desc" data-i18n="tool_geo_d">اطلاعات جغرافیایی</div></div>
-    </div>
-    <div class="tool-workspace" id="workspace">
-      <div class="ws-title">⚡ <span id="ws-title-txt">یک ابزار انتخاب کنید</span></div>
-      <div id="ws-inner"><div style="color:var(--text3);font-size:12px">برای شروع روی یک ابزار کلیک کنید</div></div>
-    </div>
-`;
+let curLang='fa',curTool='translate',isDark=false;
 
-    const aiPanel = document.createElement('div');
-    aiPanel.className = 'ai-panel';
-    aiPanel.innerHTML = `
-    <div class="ai-header">
-      <div class="ai-dot"></div>
-      <div class="ai-title" data-i18n="ai_assistant">دستیار هوش مصنوعی</div>
-      <div class="ai-status" data-i18n="ai_online">● آنلاین</div>
-    </div>
-    <div class="ai-messages" id="ai-messages">
-      <div class="msg ai" id="ai-welcome">سلام! من دستیار هوش مصنوعی LuoLaf Studio هستم. چطور می‌توانم کمک کنم؟ 🌟</div>
-    </div>
-    <div class="ai-input-area">
-      <input class="ai-input" id="ai-input" placeholder="پیام بنویسید..." onkeydown="if(event.key==='Enter'&&!event.shiftKey)sendAI()"/>
-      <button class="ai-send" onclick="sendAI()" id="ai-send-btn">➤</button>
-    </div>
-`;
+window.setLang = function(l) {
+  curLang=l;
+  const t=T[l];
+  const isRtl=t.dir==='rtl';
+  document.getElementById('panel').style.direction=t.dir;
+  document.getElementById('panel').style.fontFamily=t.font+',sans-serif';
+  ['l-ip','l-speed','l-uid','l-browser','l-os','l-screen'].forEach((id,i)=>{
+    const keys=['ip','speed','uid','browser','os','screen'];
+    document.getElementById(id).textContent=t[keys[i]];
+  });
+  ['translate','code','law','chat','geo'].forEach(k=>{
+    document.getElementById('tl-'+k).textContent=t[k];
+  });
+  document.getElementById('runBtn').textContent=t.runBtn;
+  document.getElementById('tool-name-main').textContent=t.toolTitle[curTool];
+  document.getElementById('toolInput').placeholder=t.placeholder[curTool];
+  document.getElementById('ai-name-txt').textContent=t.aiName;
+  document.getElementById('ai-status-txt').textContent=t.aiStatus;
+  document.getElementById('ai-input').placeholder=t.aiPlaceholder;
+  document.getElementById('ai-welcome').textContent=t.aiWelcome;
+  document.getElementById('footerLeft').textContent=t.footerLeft;
+  document.getElementById('loadText').textContent=t.load;
+  const d=document.getElementById('tool-lang-sel');
+  if(curTool==='translate')d.style.display='block'; else d.style.display='none';
+};
 
-    main.appendChild(leftCol);
-    main.appendChild(aiPanel);
+window.toggleDark = function() {
+  isDark=!isDark;
+  document.body.classList.toggle('dark',isDark);
+  document.querySelector('.btn-icon').textContent=isDark?'☀️':'🌙';
+  if (typeof window.drawClouds === 'function') drawClouds();
+};
 
-    const footer = document.createElement('div');
-    footer.className = 'footer';
-    footer.innerHTML = 'مدیر پروژه: <strong>LuoLaf.Studio</strong>';
+window.showTool = function(t) {
+  curTool = t;
+  const langData = T[curLang];
+  document.getElementById('tool-name-main').textContent = langData.toolTitle[t];
+  document.getElementById('toolInput').placeholder = langData.placeholder[t];
+  
+  const d = document.getElementById('tool-lang-sel');
+  if(t === 'translate') d.style.display = 'block'; 
+  else d.style.display = 'none';
 
-    glass.appendChild(header);
-    glass.appendChild(infoBar);
-    glass.appendChild(main);
-    glass.appendChild(footer);
+  const buttons = document.querySelectorAll('.tool-btn');
+  buttons.forEach(btn => btn.classList.remove('active'));
+  
+  const activeBtnId = 'btn-' + t;
+  const activeBtn = document.getElementById(activeBtnId);
+  if(activeBtn) activeBtn.classList.add('active');
 
-    panel.appendChild(glass);
-    rootDiv.appendChild(panel);
+  const icons = {
+    translate: '🌐',
+    code: '💻',
+    law: '⚖️',
+    chat: '💬',
+    geo: '🗺️'
+  };
+  document.getElementById('tool-icon-main').textContent = icons[t] || '🌐';
+};
 
-    document.body.appendChild(canvas);
-    document.body.appendChild(rootDiv);
-
-    const langModal = document.createElement('div');
-    langModal.className = 'lang-modal';
-    langModal.onclick = function(event) {
-        if (event.target === this) this.classList.remove('show');
-    };
-    langModal.innerHTML = `
-<div class="lang-box">
-<div style="font-size:15px;font-weight:600;color:var(--text)">انتخاب زبان</div>
-<div class="lang-grid" id="lang-grid"></div>
-</div>
-`;
-    document.body.appendChild(langModal);
-
-    // افزودن منطق جاوا اسکریپت
-    const LANGS = {
-        fa: { name: 'فارسی', dir: 'rtl', t: { time: 'زمان', date: 'تاریخ', ip: 'آدرس IP', speed: 'سرعت', user_id: 'شناسه کاربر', os: 'سیستم', browser: 'مرورگر', tool_translate: 'مترجم هوشمند', tool_translate_d: 'ترجمه در ۲۰+ زبان', tool_code: 'کدنویس قوی', tool_code_d: 'تولید و اصلاح کد', tool_legal: 'مشاور حقوقی', tool_legal_d: 'راهنمایی قانونی', tool_chat: 'دستیار هوشمند', tool_chat_d: 'چت‌بات کمکی', tool_geo: 'جغرافیادان', tool_geo_d: 'اطلاعات جغرافیایی', ai_assistant: 'دستیار هوش مصنوعی', ai_online: '● آنلاین', ai_welcome: 'سلام! من دستیار هوش مصنوعی LuoLaf Studio هستم 🌟', ai_ph: 'پیام بنویسید...' } },
-        en: { name: 'English', dir: 'ltr', t: { time: 'Time', date: 'Date', ip: 'IP Address', speed: 'Speed', user_id: 'User ID', os: 'System', browser: 'Browser', tool_translate: 'Translator', tool_translate_d: 'Translate 20+ languages', tool_code: 'Code Expert', tool_code_d: 'Generate & fix code', tool_legal: 'Legal Advisor', tool_legal_d: 'Legal guidance', tool_chat: 'AI Assistant', tool_chat_d: 'Smart chatbot', tool_geo: 'Geographer', tool_geo_d: 'Geographic info', ai_assistant: 'AI Assistant', ai_online: '● Online', ai_welcome: 'Hello! I am the LuoLaf Studio AI assistant 🌟', ai_ph: 'Type a message...' } },
-        tr: { name: 'Türkçe', dir: 'ltr', t: { time: 'Saat', date: 'Tarih', ip: 'IP Adresi', speed: 'Hız', user_id: 'Kullanıcı ID', os: 'Sistem', browser: 'Tarayıcı', tool_translate: 'Çevirmen', tool_translate_d: '20+ dil desteği', tool_code: 'Kod Uzmanı', tool_code_d: 'Kod oluştur ve düzelt', tool_legal: 'Hukuk Danışmanı', tool_legal_d: 'Hukuki rehberlik', tool_chat: 'AI Asistan', tool_chat_d: 'Akıllı sohbet botu', tool_geo: 'Coğrafyacı', tool_geo_d: 'Coğrafi bilgi', ai_assistant: 'AI Asistanı', ai_online: '● Çevrimiçi', ai_welcome: 'Merhaba! LuoLaf Studio AI asistanıyım 🌟', ai_ph: 'Mesaj yazın...' } },
-        ar: { name: 'العربية', dir: 'rtl', t: { time: 'الوقت', date: 'التاريخ', ip: 'IP', speed: 'السرعة', user_id: 'معرف المستخدم', os: 'النظام', browser: 'المتصفح', tool_translate:'المترجم', tool_translate_d: 'ترجمة بأكثر من 20 لغة', tool_code: 'خبير البرمجة', tool_code_d: 'توليد وإصلاح الكود', tool_legal: 'المستشار القانوني', tool_legal_d: 'الإرشاد القانوني', tool_chat: 'المساعد الذكي', tool_chat_d: 'روبوت دردشة ذكي', tool_geo: 'الجغرافي', tool_geo_d: 'معلومات جغرافية', ai_assistant: 'مساعد AI', ai_online: '● متصل', ai_welcome: 'مرحباً! أنا مساعد LuoLaf Studio الذكي 🌟', ai_ph: 'اكتب رسالة...' } },
-        ku: { name: 'کوردی', dir: 'rtl', t: { time: 'کات', date: 'بەروار', ip: 'IP', speed: 'خێرایی', user_id: 'ناسنامە',os: 'سیستەم', browser: 'گەڕۆک', tool_translate: 'وەرگێڕ', tool_translate_d: 'وەرگێڕان بە +20 زمان', tool_code: 'شارەزای کۆد', tool_code_d: 'دروستکردنی کۆد', tool_legal: 'ئەنجوومەنی یاسایی', tool_legal_d: 'ڕێنمایی یاسایی', tool_chat: 'یارمەتیدەری زیرەک', tool_chat_d: 'چاتبۆتی زیرەک', tool_geo: 'جوگرافیناس', tool_geo_d: 'زانیاری جوگرافی', ai_assistant: 'یارمەتیدەری AI', ai_online: '● ئۆنلاین', ai_welcome: 'سڵاو! من یارمەتیدەری AI ی LuoLaf Studio م 🌟', ai_ph: 'نامە بنووسە...' } },
-        zh: { name: '中文', dir: 'ltr', t: { time: '时间', date: '日期', ip: 'IP地址', speed: '速度', user_id: '用户ID', os: '系统', browser: '浏览器', tool_translate: '翻译器', tool_translate_d: '支持20+种语言', tool_code: '代码专家', tool_code_d: '生成和修复代码', tool_legal: '法律顾问', tool_legal_d: '法律指导', tool_chat: 'AI助手', tool_chat_d: '智能聊天机器人', tool_geo: '地理学家', tool_geo_d: '地理信息查询', ai_assistant: 'AI助手', ai_online: '● 在线', ai_welcome: '您好！我是LuoLaf Studio的AI助手 🌟', ai_ph: '输入消息...' } },
-        ko: { name: '한국어', dir: 'ltr', t: { time: '시간', date: '날짜', ip: 'IP', speed: '속도', user_id: '사용자 ID', os: '시스템', browser: '브라우저', tool_translate: '번역기', tool_translate_d: '20개+ 언어 번역', tool_code: '코딩 전문가', tool_code_d: '코드 생성 및 수정', tool_legal: '법률 고문', tool_legal_d: '법적 안내', tool_chat: 'AI 어시스턴트', tool_chat_d: '스마트 챗봇', tool_geo: '지리학자', tool_geo_d: '지리 정보', ai_assistant: 'AI 어시스턴트', ai_online: '● 온라인', ai_welcome: '안녕하세요! LuoLaf Studio AI 어시스턴트입니다 🌟', ai_ph: '메시지 입력...' } },
-        fr: { name: 'Français', dir: 'ltr', t: { time: 'Heure', date: 'Date', ip: 'IP', speed: 'Vitesse', user_id: 'ID Utilisateur', os: 'Système', browser: 'Navigateur', tool_translate: 'Traducteur', tool_translate_d: 'Traduit en 20+ langues', tool_code: 'Expert Code', tool_code_d: 'Générer et corriger du code', tool_legal: 'Conseiller Juridique', tool_legal_d: 'Guidance juridique', tool_chat: 'Assistant IA', tool_chat_d: 'Chatbot intelligent', tool_geo: 'Géographe', tool_geo_d: 'Informations géographiques', ai_assistant: 'Assistant IA', ai_online: '● En ligne', ai_welcome: "Bonjour! Je suis l'assistant IA de LuoLaf Studio 🌟", ai_ph: 'Écrivez un message...' } },
-        es: { name: 'Español', dir: 'ltr', t: { time: 'Hora', date: 'Fecha', ip: 'IP', speed: 'Velocidad', user_id: 'ID Usuario', os: 'Sistema', browser: 'Navegador', tool_translate: 'Traductor', tool_translate_d: 'Traduce en 20+ idiomas', tool_code: 'Experto en Código', tool_code_d: 'Generar y corregir código', tool_legal: 'Asesor Legal', tool_legal_d: 'Orientación legal', tool_chat: 'Asistente IA', tool_chat_d: 'Chatbot inteligente', tool_geo: 'Geógrafo', tool_geo_d: 'Información geográfica', ai_assistant: 'Asistente IA', ai_online: '● En línea', ai_welcome: '¡Hola! Soy el asistente IA de LuoLaf Studio 🌟', ai_ph: 'Escribe un mensaje...' } },
-        de: { name: 'Deutsch', dir: 'ltr', t: { time: 'Zeit', date: 'Datum', ip: 'IP', speed: 'Geschwindigkeit', user_id: 'Benutzer-ID', os: 'System', browser: 'Browser', tool_translate: 'Übersetzer', tool_translate_d: 'In 20+ Sprachen übersetzen', tool_code: 'Code-Experte', tool_code_d: 'Code generieren', tool_legal: 'Rechtsberater', tool_legal_d: 'Rechtliche Beratung', tool_chat: 'KI-Assistent', tool_chat_d: 'Intelligenter Chatbot', tool_geo: 'Geograph', tool_geo_d: 'Geografische Informationen', ai_assistant: 'KI-Assistent', ai_online: '● Online', ai_welcome: 'Hallo! Ich bin der KI-Assistent von LuoLaf Studio 🌟', ai_ph: 'Nachricht schreiben...' } },
-        it: { name: 'Italiano', dir: 'ltr', t: { time: 'Ora', date: 'Data', ip: 'IP', speed: 'Velocità', user_id: 'ID Utente', os: 'Sistema', browser: 'Browser', tool_translate: 'Traduttore', tool_translate_d: 'Traduci in 20+ lingue', tool_code: 'Esperto di Codice', tool_code_d: 'Genera e correggi codice', tool_legal: 'Consulente Legale', tool_legal_d: 'Orientamento legale', tool_chat: 'Assistente IA', tool_chat_d: 'Chatbot intelligente', tool_geo: 'Geografo', tool_geo_d: 'Informazioni geografiche', ai_assistant: 'Assistente IA', ai_online: '● Online', ai_welcome: "Ciao! Sono l'assistente IA di LuoLaf Studio 🌟", ai_ph: 'Scrivi un messaggio...' } },
-        he: { name: 'עברית', dir: 'rtl', t: { time: 'שעה', date: 'תאריך', ip: 'IP', speed: 'מהירות', user_id: 'מזהה', os: 'מערכת', browser: 'דפדפן', tool_translate: 'מתרגם', tool_translate_d: 'תרגם ל-20+ שפות', tool_code: 'מומחה קוד', tool_code_d: 'יצור ותיקון קוד', tool_legal: 'יועץ משפטי', tool_legal_d: 'הדרכה משפטית', tool_chat: 'עוזר AI', tool_chat_d: 'צ׳אטבוט חכם', tool_geo: 'גיאוגרף', tool_geo_d: 'מידע גיאוגרפי', ai_assistant: 'עוזר AI', ai_online: '● מחובר', ai_welcome: 'שלום! אני עוזר ה-AI של LuoLaf Studio 🌟', ai_ph: 'כתוב הודעה...' } },
-        ru: { name: 'Русский', dir: 'ltr', t: { time: 'Время', date: 'Дата', ip: 'IP', speed: 'Скорость', user_id: 'ID', os: 'Система', browser: 'Браузер', tool_translate: 'Переводчик', tool_translate_d: 'Перевод на 20+ языков', tool_code: 'Эксперт по коду', tool_code_d: 'Генерация кода', tool_legal: 'Юрист', tool_legal_d: 'Юридическая консультация', tool_chat: 'ИИ Помощник', tool_chat_d: 'Умный чат-бот', tool_geo: 'Географ', tool_geo_d: 'Географическая информация', ai_assistant: 'ИИ Помощник', ai_online: '● Онлайн', ai_welcome: 'Привет! Я ИИ-помощник LuoLaf Studio 🌟', ai_ph: 'Введите сообщение...' } },
-        ja: { name: '日本語', dir: 'ltr', t: { time: '時刻', date: '日付', ip: 'IP', speed: '速度', user_id: 'ユーザーID', os: 'システム', browser: 'ブラウザ', tool_translate: '翻訳機', tool_translate_d: '20以上の言語に翻訳', tool_code: 'コード専門家', tool_code_d: 'コードの生成・修正', tool_legal: '法律アドバイザー', tool_legal_d: '法的ガイダンス', tool_chat: 'AIアシスタント', tool_chat_d: 'スマートチャットボット', tool_geo: '地理学者', tool_geo_d: '地理情報', ai_assistant: 'AIアシスタント', ai_online: '● オンライン', ai_welcome: 'こんにちは！LuoLaf StudioのAIアシスタントです 🌟', ai_ph: 'メッセージを入力...' } },
-        tg: { name: 'Тоҷикӣ', dir: 'ltr', t: { time: 'Вақт', date: 'Сана', ip: 'IP', speed: 'Суръат', user_id: 'ID', os: 'Система', browser: 'Браузер', tool_translate: 'Тарҷумон', tool_translate_d: 'Тарҷума ба 20+ забон', tool_code: 'Коршиноси код', tool_code_d: 'Эҷод ва ислоҳи код', tool_legal: 'Маслиҳатчии ҳуқуқӣ', tool_legal_d: 'Роҳнамоии ҳуқуқӣ', tool_chat: 'Дастёри AI', tool_chat_d: 'Чатботи зирак', tool_geo: 'Ҷуғрофиядон', tool_geo_d: 'Маълумоти ҷуғрофӣ', ai_assistant: 'Дастёри AI', ai_online: '● Онлайн', ai_welcome: 'Салом! Ман дастёри AI-и LuoLaf Studio ҳастам 🌟', ai_ph: 'Паёмро нависед...' } },
-        hy: { name: 'Հայերեն', dir: 'ltr', t: { time: 'Ժամ', date: 'Ամսաթիվ', ip: 'IP', speed: 'Արագություն', user_id: 'ID', os: 'Համակարգ', browser: 'Դիտարկիչ', tool_translate: 'Թարգմանիչ', tool_translate_d: 'Թարգմանիր 20+ լեզվով', tool_code: 'Կոդ փորձագետ', tool_code_d: 'Կոդ ստեղծիր', tool_legal: 'Իրավաբան', tool_legal_d: 'Իրավական ուղղորդում', tool_chat: 'AI Օգնական', tool_chat_d: 'Խելացի chatbot', tool_geo: 'Աշխարհագետ', tool_geo_d: 'Աշխարհագրական տվյալ', ai_assistant: 'AI Օգնական', ai_online: '● Առցանց', ai_welcome: 'Բարև! Ես LuoLaf Studio-ի AI Օգնականն եմ 🌟', ai_ph: 'Գրիր հաղորդագրություն...' } },
-        hr: { name: 'Hrvatski', dir: 'ltr', t: { time: 'Vrijeme', date: 'Datum', ip: 'IP', speed: 'Brzina', user_id: 'ID', os: 'Sustav', browser: 'Preglednik', tool_translate: 'Prevoditelj', tool_translate_d: 'Prevedi na 20+ jezika', tool_code: 'Stručnjak za kod', tool_code_d: 'Generirati i popraviti kod', tool_legal: 'Pravni savjetnik', tool_legal_d: 'Pravno vodstvo', tool_chat: 'AI asistent', tool_chat_d: 'Pametni chatbot', tool_geo: 'Geograf', tool_geo_d: 'Geografske informacije', ai_assistant: 'AI asistent', ai_online: '● Online', ai_welcome: 'Pozdrav! Ja sam AI asistent LuoLaf Studija 🌟', ai_ph: 'Upišite poruku...' } },
-        ms: { name: 'Melayu', dir: 'ltr', t: { time: 'Masa', date: 'Tarikh', ip: 'IP', speed: 'Kelajuan', user_id: 'ID', os: 'Sistem', browser: 'Pelayar', tool_translate: 'Penterjemah', tool_translate_d: 'Terjemah dalam 20+ bahasa', tool_code: 'Pakar Kod', tool_code_d: 'Jana dan baiki kod', tool_legal: 'Penasihat Undang-undang', tool_legal_d: 'Panduan undang-undang', tool_chat: 'Pembantu AI', tool_chat_d: 'Chatbot pintar', tool_geo: 'Ahli Geografi', tool_geo_d: 'Maklumat geografi', ai_assistant: 'Pembantu AI', ai_online: '● Dalam talian', ai_welcome: 'Helo! Saya pembantu AI LuoLaf Studio 🌟', ai_ph: 'Taip mesej...' } },
-        hi: { name: 'हिन्दी', dir: 'ltr', t: { time: 'समय', date: 'तारीख', ip: 'IP', speed: 'गति', user_id: 'ID', os: 'सिस्टम', browser: 'ब्राउज़र', tool_translate: 'अनुवादक', tool_translate_d: '20+ भाषाओं में अनुवाद', tool_code: 'कोड विशेषज्ञ', tool_code_d: 'कोड बनाएं और ठीक करें', tool_legal: 'कानूनी सलाहकार', tool_legal_d: 'कानूनी मार्गदर्शन', tool_chat: 'AI सहायक', tool_chat_d: 'स्मार्ट चैटबॉट', tool_geo: 'भूगोलविद', tool_geo_d: 'भौगोलिक जानकारी', ai_assistant: 'AI सहायक', ai_online: '● ऑनलाइन', ai_welcome: 'नमस्ते! मैं LuoLaf Studio का AI सहायक हूं 🌟', ai_ph: 'संदेश लिखें...' } }
-    };
-
-    let lang = 'fa', dark = 0, curTool = 'chat';
-    const uid = 'USR-' + Math.random().toString(36).substr(2, 8).toUpperCase();
-    document.getElementById('uid-val').textContent = uid;
-
-    window.detectOS = function detectOS() {
-        const u = navigator.userAgent;
-        if (/Windows/.test(u)) return 'Windows';
-        if (/Mac/.test(u)) return 'macOS';
-        if (/Android/.test(u)) return 'Android';
-        if (/iPhone|iPad/.test(u)) return 'iOS';
-        if (/Linux/.test(u)) return 'Linux';
-        return 'Unknown';
-    }
-
-    window.detectBrowser = function detectBrowser() {
-        const u = navigator.userAgent;
-        if (/Edg/.test(u)) return 'Edge';
-        if (/Chrome/.test(u)) return 'Chrome';
-        if (/Firefox/.test(u)) return 'Firefox';
-        if (/Safari/.test(u)) return 'Safari';
-        return 'Unknown';
-    }
-
-    document.getElementById('os-val').textContent = detectOS();
-    document.getElementById('browser-val').textContent = detectBrowser();
-
-    window.updateClock = function updateClock() {
-        const n = new Date();
-        const locales = { fa: 'fa-IR', ar: 'ar-SA', ku: 'ar', zh: 'zh-CN', ko: 'ko-KR', ja: 'ja-JP', ru: 'ru-RU', he: 'he-IL', hi: 'hi-IN' };
-        const lc = locales[lang] || 'en-US';
-        document.getElementById('clock').textContent = n.toLocaleTimeString(lc);
-        document.getElementById('date-val').textContent = n.toLocaleDateString(lc, { year: 'numeric', month: 'short', day: 'numeric' });
-    }
-    setInterval(updateClock, 1000); updateClock();
-
-    fetch('https://api.ipify.org?format=json').then(r => r.json()).then(d => { document.getElementById('ip-val').textContent = d.ip }).catch(() => { document.getElementById('ip-val').textContent = 'N/A' });
-
-    (async () => {
-        const el = document.getElementById('speed-val');
-        try {
-            const t0 = performance.now();
-            await fetch('https://www.google.com/favicon.ico?r=' + Date.now(), { cache: 'no-store' });
-            const ms = performance.now() - t0;
-            el.textContent = ms < 200 ? 'عالی ✓' : ms < 500 ? 'خوب' : ms < 1000 ? 'متوسط' : 'ضعیف';
-        } catch { el.textContent = 'N/A' }
-    })();
-
-    const hour = new Date().getHours();
-    const weathers = ['normal', 'rain', 'thunder', 'hail', 'electric'];
-    const w = weathers[Math.floor(Math.random() * weathers.length)];
-    const wEmoji = { normal: hour >= 6 && hour < 20 ? '☀️ روشن' : '🌙 شب', rain: '🌧️ بارانی', thunder: '⛈️ رعد و برق', hail: '🌨️ تگرگ', electric: '⚡ طوفان' };
-    document.getElementById('weather-txt').textContent = wEmoji[w];
-
-    window.toggleDark = function toggleDark() {
-        dark = dark ? 0 : 1;
-        document.getElementById('root').setAttribute('data-dark', dark);
-        document.getElementById('dark-btn').textContent = dark ? '☀️' : '🌙';
-    }
-
-    window.applyLang = function applyLang(l) {
-        lang = l; const L = LANGS[l];
-        document.getElementById('root').style.direction = L.dir;
-        document.getElementById('root').style.fontFamily = (l === 'fa' || l === 'ar' || l === 'ku') ? 'Vazirmatn,Inter,sans-serif' : 'Inter,Vazirmatn,sans-serif';
-        document.getElementById('lang-label').textContent = L.name;
-        document.querySelectorAll('[data-i18n]').forEach(el => { const k = el.getAttribute('data-i18n'); if (L.t[k]) el.textContent = L.t[k] });
-        document.getElementById('ai-input').placeholder = L.t.ai_ph || '...';
-        const wel = document.getElementById('ai-welcome'); if (wel) wel.textContent = L.t.ai_welcome;
-        document.querySelectorAll('.lang-item').forEach(it => it.classList.remove('sel'));
-        const s = document.querySelector(`.lang-item[data-l="${l}"]`); if (s) s.classList.add('sel');
-        document.querySelector('.lang-modal').classList.remove('show');
-        updateClock();
-    }
-
-    const lg = document.getElementById('lang-grid');
-    Object.entries(LANGS).forEach(([k, v]) => {
-        const d = document.createElement('div');
-        d.className = 'lang-item' + (k === lang ? ' sel' : '');
-        d.setAttribute('data-l', k); d.textContent = v.name;
-        d.onclick = () => applyLang(k); lg.appendChild(d);
-    });
-
-    const TOOL_PROMPTS = {
-        translate: 'You are a professional translator. The user will give you text. Translate it to at least 5 languages (English, Arabic, French, Spanish, German) and show clearly labeled results. Be concise.',
-        code: 'You are an expert programmer. Help with code questions clearly. Provide working code with brief explanations.',
-        legal: 'You are a legal advisor. Answer legal questions clearly, note that you provide general information not legal advice, and suggest consulting a lawyer for specific cases.',
-        chat: 'You are a friendly and helpful AI assistant. Answer questions clearly and helpfully.',
-        geo: 'You are a geography expert. Answer geographical questions with accurate information about locations, countries, capitals, landmarks, etc.'
-    };
-
-    window.setTool = function setTool(t) {
-        curTool = t;
-        document.querySelectorAll('.tool-card').forEach(c => c.classList.remove('active'));
-        document.getElementById('t-' + t).classList.add('active');
-        const L = LANGS[lang].t;
-        const nm = { translate: L.tool_translate, code: L.tool_code, legal: L.tool_legal, chat: L.tool_chat, geo: L.tool_geo };
-        document.getElementById('ws-title-txt').textContent = nm[t] || t;
-        const phs = { translate: 'متنی که می‌خواهید ترجمه شود...', code: 'کد یا مشکل خود را بنویسید...', legal: 'سوال حقوقی خود را بپرسید...', chat: 'سوال خود را بپرسید...', geo: 'مکان یا سوال جغرافیایی...' };
-        document.getElementById('ws-inner').innerHTML = `<textarea class="ws-textarea" id="ws-ta" placeholder="${phs[t] || '...'}"></textarea><button class="ws-btn" id="ws-run" onclick="runTool()">▶ اجرا</button><div class="ws-result" id="ws-res"></div>`;
-    }
-
-    window.runTool = async function runTool() {
-        const ta = document.getElementById('ws-ta');
-        const res = document.getElementById('ws-res');
-        const btn = document.getElementById('ws-run');
-        if (!ta || !ta.value.trim()) return;
-        res.style.display = 'block'; res.textContent = '⏳ در حال پردازش...'; btn.disabled = true;
-        try {
-            const r = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 1000, system: TOOL_PROMPTS[curTool] || TOOL_PROMPTS.chat, messages: [{ role: 'user', content: ta.value }] }) });
-            if (!r.ok) throw new Error('HTTP ' + r.status);
-            const d = await r.json();
-            res.textContent = d.content && d.content[0] ? d.content[0].text : 'خطا در دریافت پاسخ';
-        } catch (e) { res.textContent = '⚠️ خطا: ' + e.message }
-        btn.disabled = false;
-    }
-
-    const AI_HIST = [];
-    window.sendAI = async function sendAI() {
-        const inp = document.getElementById('ai-input');
-        const msgs = document.getElementById('ai-messages');
-        const btn = document.getElementById('ai-send-btn');
-        const txt = inp.value.trim();
-        if (!txt || btn.disabled) return;
-        const um = document.createElement('div'); um.className = 'msg user'; um.textContent = txt; msgs.appendChild(um);
-        inp.value = ''; btn.disabled = true;
-        const ty = document.createElement('div'); ty.className = 'typing'; ty.innerHTML = '<span></span><span></span><span></span>'; msgs.appendChild(ty);
-        msgs.scrollTop = msgs.scrollHeight;
-        AI_HIST.push({ role: 'user', content: txt });
-        try {
-            const r = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 1000, system: 'You are the LuoLaf Studio AI assistant — helpful, friendly, and concise. Always reply in the same language the user writes in.', messages: AI_HIST.slice(-10) }) });
-            if (!r.ok) {
-                const err = await r.json().catch(() => ({}));
-                throw new Error(err.error?.message || 'HTTP ' + r.status);
-            }
-            const d = await r.json();
-            ty.remove();
-            const am = document.createElement('div'); am.className = 'msg ai';
-            const reply = d.content && d.content[0] ? d.content[0].text : 'پاسخی دریافت نشد';
-            am.textContent = reply; msgs.appendChild(am);
-            AI_HIST.push({ role: 'assistant', content: reply });
-        } catch (e) {
-            ty.remove();
-            const em = document.createElement('div'); em.className = 'msg err';
-            em.textContent = '⚠️ ' + e.message; msgs.appendChild(em);
-            AI_HIST.pop();
-        }
-        btn.disabled = false; msgs.scrollTop = msgs.scrollHeight;
-    }
-
-    const canvasEl = document.getElementById('cloud-canvas');
-    const ctx = canvasEl.getContext('2d');
-    function resize() { canvasEl.width = window.innerWidth; canvasEl.height = window.innerHeight }
-    resize(); window.addEventListener('resize', resize);
-
-    const clouds = Array.from({ length: 8 }, (_, i) => ({ x: Math.random() * window.innerWidth, y: 30 + Math.random() * 220, w: 150 + Math.random() * 200, h: 60 + Math.random() * 90, spd: .1 + Math.random() * .25, op: .5 + Math.random() * .4, bumps: Array.from({ length: 6 }, () => ({ dx: Math.random(), dy: Math.random(), r: 18 + Math.random() * 40 })) }));
-    const drops = [];
-    let fr = 0;
-
-    function animate() {
-        ctx.clearRect(0, 0, canvasEl.width, canvasEl.height); fr++;
-        if (fr % 3 === 0) {
-            if (w === 'rain' || w === 'thunder') for (let i = 0; i < 4; i++) drops.push({ x: Math.random() * canvasEl.width, y: -5, spd: 9 + Math.random() * 7, len: 14 + Math.random() * 10, a: .25 + Math.random() * .35 });
-        }
-        clouds.forEach(c => {
-            c.x += c.spd; if (c.x > canvasEl.width + 250) c.x = -250;
-            const col = dark ? 'rgba(40,50,90,' : 'rgba(210,230,255,';
-            c.bumps.forEach(b => { ctx.beginPath(); ctx.arc(c.x + b.dx * c.w, c.y + b.dy * c.h * .6, b.r, 0, Math.PI * 2); ctx.fillStyle = col + (c.op * .85) + ')'; ctx.fill() });
-            ctx.beginPath(); ctx.ellipse(c.x + c.w * .5, c.y + c.h * .75, c.w * .48, c.h * .32, 0, 0, Math.PI * 2); ctx.fillStyle = col + (c.op * .6) + ')'; ctx.fill();
-        });
-        for (let i = drops.length - 1; i >= 0; i--) {
-            const d = drops[i]; ctx.save(); ctx.globalAlpha = d.a; ctx.strokeStyle = dark ? '#5577aa' : '#7799cc'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(d.x, d.y); ctx.lineTo(d.x - 2, d.y + d.len); ctx.stroke(); ctx.restore(); d.y += d.spd; if (d.y > canvasEl.height) drops.splice(i, 1);
-        }
-        requestAnimationFrame(animate);
-    }
-    animate();
-    
-    // مقداردهی اولیه ابزار چت
-    setTool('chat');
-})();
+// مخفی کردن صفحه لودینگ اولیه پس از بارگذاری کامل
+window.addEventListener('load', () => {
+  const loader = document.getElementById('loading-overlay');
+  if(loader) {
+    loader.style.opacity = '0';
+    setTimeout(() => loader.remove(), 500);
+  }
+});
