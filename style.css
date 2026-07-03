@@ -50,4 +50,8 @@ input, select, button {
     width: 350px !important;
     height: auto !important;
     pointer-events: auto !important;
+    .orite-compact {
+    max-width: 600px !important;
+    margin: 0 auto;
+}
 }

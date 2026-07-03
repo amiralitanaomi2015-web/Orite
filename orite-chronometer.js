@@ -23,7 +23,7 @@
         const chrono = document.createElement('div');
         chrono.id = 'orite-chronometer';
         // استایل مدرن و مرتب
-        chrono.style.cssText = "position:fixed !important; bottom:20px !important; right:1101px !important; width:300px !important; background:#ffffff !important; padding:15px !important; border-radius:15px !important; box-shadow:0 4px 12px rgba(0,0,0,0.15) !important; z-index:999999 !important; border:1px solid #e0e0e0 !important; font-family:sans-serif !important; color:#333 !important;";
+        chrono.style.cssText = "position:fixed !important; bottom:20px !important; right:1151px !important; width:300px !important; background:#ffffff !important; padding:15px !important; border-radius:15px !important; box-shadow:0 4px 12px rgba(0,0,0,0.15) !important; z-index:999999 !important; border:1px solid #e0e0e0 !important; font-family:sans-serif !important; color:#333 !important;";
 
         chrono.innerHTML = `
             <select id="lang-sel" style="width:100%; padding:5px; margin-bottom:10px; border-radius:5px;">
