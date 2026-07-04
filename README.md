@@ -36,4 +36,4 @@ link:https://amiralitanaomi2015-web.github.io/Orite/
 3. Start planning!
 
 ---
-Developed with ❤️ by [Amiralitanaomi/LuoLafStudio]
+Developed with ❤️☕🥳 by [Amiralitanaomi/LuoLafStudio]
