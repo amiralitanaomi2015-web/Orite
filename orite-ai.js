@@ -59,18 +59,24 @@
         document.getElementById('ai-input').placeholder = d.input;
     };
 
+    function escapeHTML(str) {
+        const div = document.createElement('div');
+        div.appendChild(document.createTextNode(str));
+        return div.innerHTML;
+    }
+
     window.sendAI = function() {
         const input = document.getElementById('ai-input');
         const history = document.getElementById('chat-history');
         const lang = document.getElementById('ai-lang').value;
         const msg = input.value.toLowerCase();
         if (!msg) return;
-        history.innerHTML += `<div>👤: ${msg}</div>`;
+        history.innerHTML += `<div>👤: ${escapeHTML(msg)}</div>`;
         let reply = dict[lang].hello;
         if (msg.includes("hello") || msg.includes("سلام") || msg.includes("مرحبا") || msg.includes("你好")) reply = dict[lang].hello;
         else if (msg.includes("date") || msg.includes("تاریخ") || msg.includes("تاريخ") || msg.includes("日期")) reply = dict[lang].date + new Date().toLocaleDateString('en-GB');
         else if (msg.includes("platform") || msg.includes("پلتفرم") || msg.includes("منصة") || msg.includes("平台")) reply = dict[lang].about;
-        setTimeout(() => { history.innerHTML += `<div style="color:#5c67f2">🤖: ${reply}</div>`; history.scrollTop = history.scrollHeight; }, 500);
+        setTimeout(() => { history.innerHTML += `<div style="color:#5c67f2">🤖: ${escapeHTML(reply)}</div>`; history.scrollTop = history.scrollHeight; }, 500);
         input.value = "";
     };
 

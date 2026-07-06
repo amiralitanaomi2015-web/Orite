@@ -30,6 +30,12 @@ function initSupport() {
     const WORKER_URL = 'https://orite-hub-tools-ai.amiralitanaomi2015.workers.dev';
     let curLang = 'fa', curTab = 'overview', starRating = 0, aiHistory = [], servantMood = 'happy', clickCount = 0;
 
+    function escapeHTML(str) {
+        const div = document.createElement('div');
+        div.appendChild(document.createTextNode(str));
+        return div.innerHTML;
+    }
+
     function getData(k,d){try{return JSON.parse(localStorage.getItem('orite_sup_'+k))||d;}catch{return d;}}
     function setData(k,v){localStorage.setItem('orite_sup_'+k,JSON.stringify(v));}
 
@@ -144,13 +150,14 @@ function initSupport() {
     async function getBattery(){try{const b=await navigator.getBattery();return Math.round(b.level*100)+'% '+(b.charging?'⚡':'🔋');}catch{return 'N/A';}}
 
     function scanSecurity(){
+        const hasCSP = !!document.querySelector('meta[http-equiv="Content-Security-Policy"]');
         const checks=[
             {name:'HTTPS',ok:location.protocol==='https:',msg:location.protocol==='https:'?'اتصال امن HTTPS فعال':'اتصال ناامن HTTP'},
             {name:'Cloudflare Worker',ok:true,msg:'پروکسی امن فعال'},
             {name:'API Key',ok:true,msg:'کلید در سرور ذخیره'},
-            {name:'CORS',ok:true,msg:'محدودیت دسترسی فعال'},
+            {name:'CSP',ok:hasCSP,msg:hasCSP?'Content-Security-Policy فعال':'CSP تنظیم نشده'},
             {name:'localStorage',ok:true,msg:'داده‌ها محلی ذخیره'},
-            {name:'XSS Protection',ok:true,msg:'محافظت XSS فعال'},
+            {name:'XSS Sanitization',ok:typeof escapeHTML==='function'||hasCSP,msg:hasCSP?'محافظت XSS فعال (CSP + sanitization)':'محافظت XSS محدود'},
         ];
         return{checks,score:Math.round((checks.filter(c=>c.ok).length/checks.length)*100)};
     }
@@ -233,7 +240,7 @@ function initSupport() {
                 ${comments.length===0?`<div style="text-align:center;color:#446688;font-size:12px;padding:20px">${tr.comments.empty}</div>`:
                 comments.slice().reverse().map(c=>`<div class="sup-holo" style="border-radius:10px;padding:10px;margin-bottom:8px;animation:supSlideR 0.3s ease">
                     <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:10px;color:#0078ff">👤 ${c.id}</span><span style="font-size:10px;color:#446688">${c.date}</span></div>
-                    <div style="font-size:12px;color:#e0e8ff">${c.text}</div>
+                    <div style="font-size:12px;color:#e0e8ff">${escapeHTML(c.text)}</div>
                 </div>`).join('')}
             </div>`;
         if(curTab==='problems'){
@@ -256,7 +263,7 @@ function initSupport() {
                 <textarea id="sup-prob-desc" class="sup-input" placeholder="${tr.problems.descPlaceholder}" style="width:100%;background:rgba(0,120,255,0.05);border:1px solid rgba(0,120,255,0.2);border-radius:8px;padding:8px;color:#e0e8ff;font-family:inherit;font-size:12px;resize:vertical;min-height:60px;box-sizing:border-box"></textarea>
                 <button class="sup-btn" onclick="supSubmitProblem()" style="margin-top:8px;padding:8px 20px;background:linear-gradient(135deg,#ff4444,#aa0000);color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:inherit;font-size:12px">${tr.problems.submit}</button>
             </div>
-            ${problems.length>0?`<div style="margin-top:10px;max-height:150px;overflow-y:auto">${problems.slice().reverse().map(p=>`<div class="sup-holo" style="border-radius:10px;padding:10px;margin-bottom:8px;animation:supSlideR 0.3s ease"><div style="font-size:12px;font-weight:600;color:#ff8888">${p.title}</div><div style="font-size:11px;color:#aaa">${p.desc}</div><div style="font-size:10px;color:#446688;margin-top:4px">${p.date}</div></div>`).join('')}</div>`:''}`;
+            ${problems.length>0?`<div style="margin-top:10px;max-height:150px;overflow-y:auto">${problems.slice().reverse().map(p=>`<div class="sup-holo" style="border-radius:10px;padding:10px;margin-bottom:8px;animation:supSlideR 0.3s ease"><div style="font-size:12px;font-weight:600;color:#ff8888">${escapeHTML(p.title)}</div><div style="font-size:11px;color:#aaa">${escapeHTML(p.desc)}</div><div style="font-size:10px;color:#446688;margin-top:4px">${escapeHTML(p.date)}</div></div>`).join('')}</div>`:''}`;
         }
         if(curTab==='security'){
             const sec=scanSecurity();
