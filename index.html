@@ -2,6 +2,7 @@
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com; font-src https://fonts.gstatic.com; connect-src https://api.ipify.org https://get.geojs.io https://wttr.in https://nominatim.openstreetmap.org https://orite-hub-tools-ai.amiralitanaomi2015.workers.dev https://cdn.jsdelivr.net; img-src 'self' https://*.tile.openstreetmap.org data:;">
     <style>
         :root { --bg: #f0f2f5; --card: #fff; --text: #333; --primary: #5c67f2; --danger: #ff4757; }
         .dark-mode { --bg: #1a1a1a; --card: #2d2d2d; --text: #f0f0f5; }
@@ -41,6 +42,12 @@
     </div>
 
 <script>
+    function escapeHTML(str) {
+        const div = document.createElement('div');
+        div.appendChild(document.createTextNode(str));
+        return div.innerHTML;
+    }
+
     let tasks = JSON.parse(localStorage.getItem('oriteTasks')) || [];
     let editIdx = -1; // برای نگهداری وضعیت ویرایش
 
@@ -82,7 +89,7 @@
         tasks.forEach((t, i) => {
             if(now > (t.time + 5000)) document.getElementById('bell').classList.add('shake');
             list.innerHTML += `<div class="task-item">
-                <div>${t.desc} <br> <small>${new Date(t.time).toLocaleString()}</small></div>
+                <div>${escapeHTML(t.desc)} <br> <small>${escapeHTML(new Date(t.time).toLocaleString())}</small></div>
                 <div>
                     <button onclick="edit(${i})" style="background:orange; width:auto; padding:5px;">✏️</button>
                     <button onclick="del(${i})" style="background:var(--danger); width:auto; padding:5px;">❌</button>

@@ -3,6 +3,12 @@
     const existing = document.getElementById('orite-todo-panel');
     if (existing) existing.remove();
 
+    function escapeHTML(str) {
+        const div = document.createElement('div');
+        div.appendChild(document.createTextNode(str));
+        return div.innerHTML;
+    }
+
     // ۲. دیکشنری ۱۰ زبانه
     const dict = {
         fa: { title: "لیست کارها", add: "افزودن", placeholder: "توضیحات و نام برنامه...", del: "حذف", edit: "ویرایش", save: "ذخیره", empty: "هیچ برنامه‌ای ثبت نشده", timeLabel: "ساعت:", dateLabel: "تاریخ:", locLabel: "مکان:" },
@@ -89,15 +95,15 @@
             
             li.innerHTML = `
                 <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                    <span class="task-text" style="word-break:break-word; width:75%;">${taskText.replace(/\n/g, '<br>')}</span>
+                    <span class="task-text" style="word-break:break-word; width:75%;">${escapeHTML(taskText).replace(/\n/g, '<br>')}</span>
                     <div style="display:flex; gap:4px;">
                         <button class="edit-btn" style="background:#ffc107; color:#333; border:none; border-radius:3px; padding:3px 5px; cursor:pointer; font-size:10px;">${d.edit}</button>
                         <button class="del-btn" style="background:#dc3545; color:white; border:none; border-radius:3px; padding:3px 5px; cursor:pointer; font-size:10px;">${d.del}</button>
                     </div>
                 </div>
                 <div style="font-size:10px; color:#555; background:#f8f9fa; padding:4px; border-radius:4px; display:flex; justify-content:space-between;">
-                    <span>📍 <b>${d.locLabel}</b> ${setLoc}</span>
-                    <span>🕒 ${setDate} - ${setTime}</span>
+                    <span>📍 <b>${d.locLabel}</b> ${escapeHTML(setLoc)}</span>
+                    <span>🕒 ${escapeHTML(setDate)} - ${escapeHTML(setTime)}</span>
                 </div>
                 <span style="font-size:8.5px; color:#999; text-align:right;">ثبت شده در: ${createdStamp}</span>
             `;
@@ -112,7 +118,7 @@
             editBtn.onclick = () => {
                 if (editBtn.innerText === d.edit) {
                     const textareaEdit = document.createElement('textarea');
-                    textareaEdit.value = taskSpan.innerHTML.replace(/<br>/g, '\n');
+                    textareaEdit.value = taskSpan.textContent;
                     textareaEdit.style.cssText = "width:75%; height:40px; padding:4px; border:1px solid #ccc; border-radius:3px; resize:none; font-family:inherit;";
                     
                     taskSpan.replaceWith(textareaEdit);
@@ -124,7 +130,7 @@
                         const newSpan = document.createElement('span');
                         newSpan.className = 'task-text';
                         newSpan.style.cssText = "word-break:break-word; width:75%;";
-                        newSpan.innerHTML = newText.replace(/\n/g, '<br>');
+                        newSpan.innerHTML = escapeHTML(newText).replace(/\n/g, '<br>');
                         
                         li.querySelector('textarea').replaceWith(newSpan);
                         editBtn.innerText = d.edit;
