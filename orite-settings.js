@@ -13,7 +13,7 @@
 
     // ۲. ایجاد پنل در DOM
     const panel = document.createElement('div');
-    panel.style.cssText = "position:fixed; top:50px; right:20px; background:#fff; color:#0056b3; padding:20px; border-radius:12px; z-index:999999; border:2px solid #0056b3; box-shadow:0 4px 15px rgba(0,0,0,0.3); width:320px; font-family:sans-serif;";
+    panel.style.cssText = "background:#ffffff !important; padding:15px !important; border-radius:15px !important; box-shadow:0 4px 15px rgba(0,0,0,0.15) !important; border:1px solid #e0e0e0 !important; font-family:Tahoma, Arial, sans-serif !important; color:#333 !important; width:481px !important; margin-top:20px !important;";
 
     function renderPanel() {
         const t = translations[currentLang];

@@ -30,7 +30,7 @@
     let lang = 'fa';
     const panel = document.createElement('div');
     panel.id = 'settings-panel';
-    panel.style.cssText = "position:fixed !important; bottom:20px !important; right:20px !important; width:350px !important; background:white !important; padding:20px !important; border-radius:15px !important; box-shadow:0 5px 15px rgba(0,0,0,0.3) !important; z-index:1000 !important; border:1px solid #ddd !important;";
+    panel.style.cssText = "background:#ffffff !important; padding:15px !important; border-radius:15px !important; box-shadow:0 4px 15px rgba(0,0,0,0.15) !important; border:1px solid #e0e0e0 !important; font-family:Tahoma, Arial, sans-serif !important; color:#333 !important; width:481px !important; margin-top:20px !important;";
 
     function render() {
         const u = ui[lang];
