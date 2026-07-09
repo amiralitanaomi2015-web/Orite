@@ -12,6 +12,11 @@ style
     width: 100%;
 }
 
+#doctor-ai-root .app {
+  width: 900px;    /* عرض پنل */
+  height: 700px;   /* طول (ارتفاع) پنل */
+}
+
 input, select, button {
     width: 100%; 
     padding: 12px;

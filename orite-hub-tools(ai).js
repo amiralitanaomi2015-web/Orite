@@ -139,7 +139,7 @@ function initAITools() {
             <!-- FOOTER -->
             <div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(91,106,240,0.1);display:flex;align-items:center;justify-content:space-between;">
                 <div style="font-size:10px;color:#9090b0;">مدیر پروژه: LuoLaf.Studio</div>
-                <div style="font-size:10px;color:#9090b0;">© 2025 Orite AI Tools v2.0</div>
+                <div style="font-size:10px;color:#9090b0;">© 2026 Orite AI Tools v2.0</div>
             </div>
         `;
 
