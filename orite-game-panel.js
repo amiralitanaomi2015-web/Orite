@@ -1097,9 +1097,7 @@ function initGame() {
     window.ttView=function(v){curView=v;render();};
 
     // ==================== INIT ====================
-    const hubPanel=document.getElementById('orite-smart-hub');
-    if(hubPanel)hubPanel.appendChild(panel);
-    else document.body.appendChild(panel);
+    document.body.appendChild(panel);
     render();
 }
 
